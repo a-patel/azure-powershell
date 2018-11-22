@@ -1,4 +1,4 @@
-﻿
+
 
 # Variables for common values
 
@@ -10,7 +10,7 @@ $tags.Add("project", "demo")
 $location = "eastus2"
 
 
-# Create Resource Group if it doesn't already exist
+# Create Resource Group, if it doesn't already exist
 
 
 ### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
@@ -48,7 +48,7 @@ If ($isRGExist) {
 ######################################################################
 
 
-# Create Resource Group if it doesn't already exist
+# Create Virtual Network, if it doesn't already exist
 
 
 ### https://docs.microsoft.com/en-us/azure/virtual-network/quick-create-powershell
