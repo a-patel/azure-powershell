@@ -45,6 +45,7 @@ If ($isRGExist) {
 # Get-AzureRmResourceGroup | Select-Object ResourceGroupName,Location
 
 
+
 ######################################################################
 
 
@@ -67,6 +68,7 @@ Get-AzureRmVirtualNetwork -Name $vnetFullName -ResourceGroupName $rgFullName -Er
 
 
 If ($isVNetExist) {
+
     # VNet doesn't exist
     "VNet doesn't exist"
 
@@ -92,6 +94,7 @@ If ($isVNetExist) {
               -Tag $tags
 
 } Else {
+
     # VNet exist
     "VNet exist"
 
