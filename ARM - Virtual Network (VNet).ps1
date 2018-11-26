@@ -1,4 +1,4 @@
-﻿
+
 
 # Variables for common values
 
@@ -18,13 +18,13 @@ $location = "eastus2"
 ### https://github.com/robotechredmond/Azure-PowerShell-Snippets/blob/master/Azure%20Resource%20Manager%20-%20Create%20V2%20environment%20w%20VNET%20GW%20demo.ps1
 
 
-$vnetName = "myvnet"
+$vnetShortName = "myvnet"
 $vnetSuffix = "-vent"
-$vnetFullName = "${vnetName}${vnetSuffix}"
+$vnetName = "${vnetShortName}${vnetSuffix}"
 
 
 
-Get-AzureRmVirtualNetwork -Name $vnetFullName -ResourceGroupName $rgFullName -ErrorVariable isVNetExist -ErrorAction SilentlyContinue `
+Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName -ErrorVariable isVNetExist -ErrorAction SilentlyContinue `
 
 
 
@@ -47,8 +47,8 @@ If ($isVNetExist) {
 
 
     $vnet = New-AzureRmVirtualNetwork `
-              -Name $vnetFullName `
-              -ResourceGroupName $rgFullName `
+              -Name $vnetName `
+              -ResourceGroupName $rgName `
               -Location $location `
               -AddressPrefix 10.0.0.0/16 `
               -Subnet $subnet1, $subnet2 `
@@ -60,13 +60,35 @@ If ($isVNetExist) {
     "VNet exist"
 
     $vnet = Get-AzureRmVirtualNetwork `
-            -Name $vnetFullName `
-            -ResourceGroupName $rgFullName
+            -Name $vnetName `
+            -ResourceGroupName $rgName
 }
 
 
 
-# Get-AzureRmVirtualNetwork | Select-Object Name,ResourceGroupName,Location
+# Get list of all VNets
+
+Get-AzureRmVirtualNetwork -ResourceGroupName $rgName `
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
 
 
+
+<#
+
+Get-AzureRmVirtualNetwork `
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
+
+#>
+
+
+
+
+
+<#
+
+
+
+#>
 
