@@ -1,38 +1,8 @@
 
-# Variables for common values
-
-$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
-$tags.Add("author", "Ashish")
-$tags.Add("project", "demo")
+<# Create Network Security Group (NSG), if it does not exist - Rules below are example placeholders that allow selected traffic from all sources #>
 
 
-$location = "eastus2"
-
-
-# Create Resource Group, if it doesn't already exist
-
-
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
-
-
-$rgShortName = "aabbccdd12"
-$rgSuffix = "-rg"
-$rgName = "${rgShortName}${rgSuffix}"
-
-
-$vnetName = "myvnet"
-$vnetSuffix = "-vent"
-$vnetFullName = "${vnetName}${vnetSuffix}"
-
-
-
-
-
-# Create Network Security Group (NSG), if it doesn't exist - Rules below are example placeholders that allow selected traffic from all sources
-
-
-
+# Variables - Network Security Group
 
 $nsgShortName = "aabbccdd44"
 $nsgSuffix = "-nsg"
@@ -42,7 +12,13 @@ $nsgName = "${nsgShortName}${nsgSuffix}"
 Get-AzureRmNetworkSecurityGroup -Name $nsgName -ResourceGroupName $rgName -ErrorVariable isNSGExist -ErrorAction SilentlyContinue `
 
 
-If ($isNSGExist) {
+If ($isNSGExist) 
+{
+    Write-Output "Network Security Group does not exist"
+    
+
+
+    Write-Verbose "Creating new Network Security Rule: {allow-rdp-inbound}"
 
     $nsgRule1 = New-AzureRmNetworkSecurityRuleConfig `
         -Name "allow-rdp-inbound" `
@@ -56,6 +32,8 @@ If ($isNSGExist) {
         -Access Allow `
         -Priority 100
 
+    Write-Verbose "Creating new Network Security Rule: {allow-http-inbound}"
+
     $nsgRule2 = New-AzureRmNetworkSecurityRuleConfig `
         -Name "allow-http-inbound" `
         -Description "Allow Inbound HTTP" `
@@ -68,14 +46,24 @@ If ($isNSGExist) {
         -Access Allow `
         -Priority 110
 
+
+
+    Write-Verbose "Creating new Network Security Group: {$nsgName}"
+
     $nsg = New-AzureRmNetworkSecurityGroup `
         -Name $nsgName `
         -ResourceGroupName $rgName `
         -Location $location `
         -SecurityRules $nsgRule1, $nsgRule2 `
         -Tag $tags
+} 
+Else 
+{
 
-} else {
+    Write-Output "Network Security Group exist"
+
+    Write-Verbose "Fetching Network Security Group: {$nsgName}"
+
 
     $nsg = Get-AzureRmNetworkSecurityGroup ` 
         -Name $nsgName `
@@ -85,11 +73,14 @@ If ($isNSGExist) {
 
 
 
-# Get list of Network Security Group (NSG)
+Write-Verbose "Get list of Network Security Group (NSG)"
+Write-Output "Network Security Groups"
+
 
 Get-AzureRmNetworkSecurityGroup -ResourceGroupName $rgName `
     | Select-Object Name, ResourceGroupName, Location `
     | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
+
 
 
 <#
@@ -99,6 +90,7 @@ Get-AzureRmNetworkSecurityGroup `
     | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
 
 #>
+
 
 
 
