@@ -1,4 +1,4 @@
-﻿
+
 
 # Variables for common values
 
@@ -9,40 +9,63 @@ $tags.Add("project", "demo")
 
 $location = "eastus2"
 
-
-# Create Resource Group, if it doesn't already exist
-
-
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
-
-
-$rgName = "aabbccdd12"
+$rgShortName = "aabbccdd12"
 $rgSuffix = "-rg"
-$rgFullName = "${rgName}${rgSuffix}"
+$rgName = "${rgShortName}${rgSuffix}"
 
 
 
-Get-AzureRmResourceGroup -Name $rgFullName -ErrorVariable isRGExist -ErrorAction SilentlyContinue `
+# Create Public IP Address, if not created
 
-If ($isRGExist) {
-    # ResourceGroup doesn't exist
-    "ResourceGroup doesn't exist"
 
-    $rg = New-AzureRmResourceGroup `
-            -Name $rgFullName `
-            -Location $location `
+### https://docs.microsoft.com/en-us/powershell/module/azurerm.network/new-azurermpublicipaddress?view=azurermps-6.13.0
+### https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermpublicipaddress?view=azurermps-6.13.0
+
+
+$publicIpName = "aabbccdd12"
+$publicIpSuffix = "-ip"
+$publicIpFullName = "${publicIpName}${publicIpSuffix}"
+$dnsPrefix  = "this"
+
+
+Get-AzureRmPublicIpAddress -Name $publicIpFullName -ResourceGroupName $rgName -ErrorVariable isIPExist -ErrorAction SilentlyContinue `
+
+
+If ($isIPExist) {
+    "Public IP does not exist"
+
+    $publicIP = New-AzureRmPublicIpAddress `
+                -Name $publicIpFullName `
+                -ResourceGroupName $rgName `
+                -Location $location `
+                -AllocationMethod 'Static' `  ## 'Static' 'Dynamic'
+                -DomainNameLabel $dnsPrefix  `  ## optional
+                -Tag $tags
 
 } Else {
-    # ResourceGroup exist
-    "ResourceGroup exist"
+    "Public IP exist"
 
-    $rg = Get-AzureRmResourceGroup `
-            -Name $rgFullName 
+    $publicIP = Get-AzureRmPublicIpAddress `
+                -Name $publicIpFullName `
+                -ResourceGroupName $rgName
 }
 
 
-# Get-AzureRmResourceGroup | Select-Object ResourceGroupName,Location
+
+# Get list of Public IPs
+
+Get-AzureRmPublicIpAddress -ResourceGroupName $rgName `
+| Select-Object Name, ResourceGroupName, Location `
+| Format-Table -AutoSize -Wrap
 
 
+
+
+<#
+
+Get-AzureRmPublicIpAddress `
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
+
+#>
 
