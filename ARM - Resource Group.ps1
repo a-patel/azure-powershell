@@ -1,7 +1,10 @@
 
+## To Set Verbose output
+$PSDefaultParameterValues['*:Verbose'] = $true
 
 
-# Variables for common values
+
+# Variables - Common
 
 $location = "eastus2"
 
@@ -19,12 +22,12 @@ $tags.Add("dataProfile", "Public")             # Public, Confidential, Restricte
 
 
 
-# Create Resource Group, if it doesn't exist
+<# Create Resource Group, if it does not exist #>
 
 
-# Variables for Resource Group
+# Variables - Resource Group
 
-$rgShortName = "aabbccdd12"
+$rgShortName = "aabbccddff"
 $rgSuffix = "-rg"
 $rgName = "${rgShortName}${rgSuffix}"
 
@@ -32,17 +35,24 @@ $rgName = "${rgShortName}${rgSuffix}"
 
 Get-AzureRmResourceGroup -Name $rgName -ErrorVariable isRGExist -ErrorAction SilentlyContinue `
 
-If ($isRGExist) {
 
-    "ResourceGroup does not exist"
+If ($isRGExist) 
+{
+    Write-Output "Resource Group does not exist"
+    
+    Write-Verbose "Creating new Resource Group: {$rgName}"
+
 
     $rg = New-AzureRmResourceGroup `
             -Name $rgName `
             -Location $location `
+} 
+Else 
+{
+    Write-Output "Resource Group exist"
 
-} Else {
+    Write-Verbose "Fetching Resource Group: {$rgName}"
 
-    "ResourceGroup exist"
 
     $rg = Get-AzureRmResourceGroup `
             -Name $rgName 
@@ -50,7 +60,9 @@ If ($isRGExist) {
 
 
 
-# Get list of Resource Groups
+Write-Verbose "Get list of Resource Groups"
+Write-Output "Resource Groups"
+
 
 Get-AzureRmResourceGroup | Select-Object ResourceGroupName, Location `
                          | Format-Table -AutoSize -Wrap -GroupBy Location
@@ -71,4 +83,12 @@ https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conven
 # Format table
 https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/format-table?view=powershell-6
 
+# PowerShell style guide
+https://github.com/PoshCode/PowerShellPracticeAndStyle
+https://poshcode.gitbooks.io/powershell-practice-and-style/Style-Guide/Introduction.html
+
 #>
+
+
+
+
