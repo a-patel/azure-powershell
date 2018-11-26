@@ -1,4 +1,4 @@
-﻿
+
 # Variables for common values
 
 $tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
@@ -16,9 +16,9 @@ $location = "eastus2"
 ### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
 
 
-$rgName = "aabbccdd12"
+$rgShortName = "aabbccdd12"
 $rgSuffix = "-rg"
-$rgFullName = "${rgName}${rgSuffix}"
+$rgName = "${rgShortName}${rgSuffix}"
 
 
 $vnetName = "myvnet"
@@ -32,17 +32,14 @@ $vnetFullName = "${vnetName}${vnetSuffix}"
 # Create Network Security Group (NSG), if it doesn't exist - Rules below are example placeholders that allow selected traffic from all sources
 
 
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermnetworksecuritygroup?view=azurermps-6.13.0
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermnetworksecurityruleconfig?view=azurermps-6.13.0&viewFallbackFrom=azurermps-6.12.0
 
 
-
-$nsgName = "aabbccdd44"
+$nsgShortName = "aabbccdd44"
 $nsgSuffix = "-nsg"
-$nsgFullName = "${nsgName}${nsgSuffix}"
+$nsgName = "${nsgShortName}${nsgSuffix}"
 
 
-Get-AzureRmNetworkSecurityGroup -Name $nsgFullName -ResourceGroupName $rgFullName -ErrorVariable isNSGExist -ErrorAction SilentlyContinue `
+Get-AzureRmNetworkSecurityGroup -Name $nsgName -ResourceGroupName $rgName -ErrorVariable isNSGExist -ErrorAction SilentlyContinue `
 
 
 If ($isNSGExist) {
@@ -72,8 +69,8 @@ If ($isNSGExist) {
         -Priority 110
 
     $nsg = New-AzureRmNetworkSecurityGroup `
-        -Name $nsgFullName `
-        -ResourceGroupName $rgFullName `
+        -Name $nsgName `
+        -ResourceGroupName $rgName `
         -Location $location `
         -SecurityRules $nsgRule1, $nsgRule2 `
         -Tag $tags
@@ -81,12 +78,33 @@ If ($isNSGExist) {
 } else {
 
     $nsg = Get-AzureRmNetworkSecurityGroup ` 
-        -Name $nsgFullName `
-        -ResourceGroupName $rgFullName
+        -Name $nsgName `
+        -ResourceGroupName $rgName
 }
 
 
 
 
-Get-AzureRmNetworkSecurityGroup | Select-Object Name,ResourceGroupName,Location
+# Get list of Network Security Group (NSG)
 
+Get-AzureRmNetworkSecurityGroup -ResourceGroupName $rgName `
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
+
+
+<#
+
+Get-AzureRmNetworkSecurityGroup `
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
+
+#>
+
+
+
+<#
+
+https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermnetworksecuritygroup?view=azurermps-6.13.0
+https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermnetworksecurityruleconfig?view=azurermps-6.13.0&viewFallbackFrom=azurermps-6.12.0
+
+#>
