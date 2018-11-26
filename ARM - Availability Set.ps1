@@ -1,4 +1,4 @@
-﻿
+
 
 # Variables for common values
 
@@ -9,40 +9,69 @@ $tags.Add("project", "demo")
 
 $location = "eastus2"
 
+$rgShortName = "aabbccdd12"
+$rgSuffix = "-rg"
+$rgName = "${rgShortName}${rgSuffix}"
 
-# Create Resource Group, if it doesn't already exist
+
+
+
+# Create an Azure Availability Set for VM high availability, if it doesn't exist
 
 
 ### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
 ### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
 
 
-$rgName = "aabbccdd12"
-$rgSuffix = "-rg"
-$rgFullName = "${rgName}${rgSuffix}"
+$asShortName = "aabbccdd12"
+$avSetSuffix = "-as"
+$asName = "${asShortName}${avSetSuffix}"
 
 
 
-Get-AzureRmResourceGroup -Name $rgFullName -ErrorVariable isRGExist -ErrorAction SilentlyContinue `
+Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName -ErrorVariable isRGExist -ErrorAction SilentlyContinue `
 
 If ($isRGExist) {
-    # ResourceGroup doesn't exist
-    "ResourceGroup doesn't exist"
+    # Availability Set doesn't exist
+    "Availability Set doesn't exist"
 
-    $rg = New-AzureRmResourceGroup `
-            -Name $rgFullName `
-            -Location $location `
+    $avSet = New-AzureRmAvailabilitySet `
+                -Name $asName `
+                -ResourceGroupName $rgName `
+                -Location $location
+
 
 } Else {
-    # ResourceGroup exist
-    "ResourceGroup exist"
+    # Availability Set exist
+    "Availability Set exist"
 
-    $rg = Get-AzureRmResourceGroup `
-            -Name $rgFullName 
+    $avSet = Get-AzureRmAvailabilitySet `
+                -Name $asName `
+                -ResourceGroupName $rgName
 }
 
 
-# Get-AzureRmResourceGroup | Select-Object ResourceGroupName,Location
+
+
+Get-AzureRmAvailabilitySet -ResourceGroupName $rgName `
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -GroupBy ResourceGroupName -Wrap 
+
+
+<#
+
+Get-AzureRmAvailabilitySet -ResourceGroupName $rgName `
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -GroupBy ResourceGroupName -Wrap 
+
+#>
 
 
 
+
+
+<#
+
+
+
+#>
