@@ -1,27 +1,9 @@
 
 
-# Variables for common values
-
-$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
-$tags.Add("author", "Ashish")
-$tags.Add("project", "demo")
+<# Create an Azure Availability Set for VM high availability, if it doesn't exist #>
 
 
-$location = "eastus2"
-
-$rgShortName = "aabbccdd12"
-$rgSuffix = "-rg"
-$rgName = "${rgShortName}${rgSuffix}"
-
-
-
-
-# Create an Azure Availability Set for VM high availability, if it doesn't exist
-
-
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
-
+# Variables - Availability Set
 
 $asShortName = "aabbccdd12"
 $avSetSuffix = "-as"
@@ -29,21 +11,26 @@ $asName = "${asShortName}${avSetSuffix}"
 
 
 
-Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName -ErrorVariable isRGExist -ErrorAction SilentlyContinue `
+Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName -ErrorVariable isASExist -ErrorAction SilentlyContinue `
 
-If ($isRGExist) {
-    # Availability Set doesn't exist
-    "Availability Set doesn't exist"
+If ($isASExist) 
+{
+    Write-Output "Availability Set does not exist"
+    
+    Write-Verbose "Creating new Availability Set: {$asName}"
+
 
     $avSet = New-AzureRmAvailabilitySet `
                 -Name $asName `
                 -ResourceGroupName $rgName `
                 -Location $location
+} 
+Else 
+{
+    Write-Output "Availability Set exist"
 
+    Write-Verbose "Fetching Availability Set: {$asName}"
 
-} Else {
-    # Availability Set exist
-    "Availability Set exist"
 
     $avSet = Get-AzureRmAvailabilitySet `
                 -Name $asName `
@@ -51,6 +38,11 @@ If ($isRGExist) {
 }
 
 
+
+
+Write-Verbose "Get list of Availability Set"
+
+Write-Output "Availability Sets"
 
 
 Get-AzureRmAvailabilitySet -ResourceGroupName $rgName `
@@ -70,8 +62,10 @@ Get-AzureRmAvailabilitySet -ResourceGroupName $rgName `
 
 
 
+
 <#
 
-
+https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
+https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
 
 #>
