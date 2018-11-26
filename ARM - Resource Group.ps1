@@ -1,48 +1,74 @@
-﻿
+
+
 
 # Variables for common values
-
-$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
-$tags.Add("author", "Ashish")
-$tags.Add("project", "demo")
-
 
 $location = "eastus2"
 
 
-# Create Resource Group, if it doesn't already exist
+$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
+$tags.Add("environment", "Production")         # Production, Staging, QA
+$tags.Add("projectName", "Demo Project")
+$tags.Add("projectVersion", "1.0.0")
+$tags.Add("managedBy", "developer.aashishpatel@gmail.com")
+$tags.Add("billTo", "Ashish Patel")
+$tags.Add("tier", "Front End")                 # Front End, Back End, Data
+$tags.Add("dataProfile", "Public")             # Public, Confidential, Restricted, Internal
 
 
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
 
 
-$rgName = "aabbccdd12"
+
+# Create Resource Group, if it doesn't exist
+
+
+# Variables for Resource Group
+
+$rgShortName = "aabbccdd12"
 $rgSuffix = "-rg"
-$rgFullName = "${rgName}${rgSuffix}"
+$rgName = "${rgShortName}${rgSuffix}"
 
 
 
-Get-AzureRmResourceGroup -Name $rgFullName -ErrorVariable isRGExist -ErrorAction SilentlyContinue `
+Get-AzureRmResourceGroup -Name $rgName -ErrorVariable isRGExist -ErrorAction SilentlyContinue `
 
 If ($isRGExist) {
-    # ResourceGroup doesn't exist
-    "ResourceGroup doesn't exist"
+
+    "ResourceGroup does not exist"
 
     $rg = New-AzureRmResourceGroup `
-            -Name $rgFullName `
+            -Name $rgName `
             -Location $location `
 
 } Else {
-    # ResourceGroup exist
+
     "ResourceGroup exist"
 
     $rg = Get-AzureRmResourceGroup `
-            -Name $rgFullName 
+            -Name $rgName 
 }
 
 
-# Get-AzureRmResourceGroup | Select-Object ResourceGroupName,Location
+
+# Get list of Resource Groups
+
+Get-AzureRmResourceGroup | Select-Object ResourceGroupName, Location `
+                         | Format-Table -AutoSize -Wrap -GroupBy Location
 
 
 
+
+
+
+<#
+
+https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
+https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
+
+# Naming Conventions
+https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
+
+# Format table
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/format-table?view=powershell-6
+
+#>
