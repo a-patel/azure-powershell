@@ -1,58 +1,52 @@
 
-
-# Variables for common values
-
-$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
-$tags.Add("author", "Ashish")
-$tags.Add("project", "demo")
+<# Create Public IP Address, if it does not exist #>
 
 
-$location = "eastus2"
+# Variables - Public IP
 
-$rgShortName = "aabbccdd12"
-$rgSuffix = "-rg"
-$rgName = "${rgShortName}${rgSuffix}"
-
-
-
-# Create Public IP Address, if not created
-
-
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.network/new-azurermpublicipaddress?view=azurermps-6.13.0
-### https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermpublicipaddress?view=azurermps-6.13.0
-
-
-$publicIpName = "aabbccdd12"
+$publicIpShortName = "aabbccdd12"
 $publicIpSuffix = "-ip"
-$publicIpFullName = "${publicIpName}${publicIpSuffix}"
+$publicIpName = "${publicIpShortName}${publicIpSuffix}"
 $dnsPrefix  = "this"
 
 
-Get-AzureRmPublicIpAddress -Name $publicIpFullName -ResourceGroupName $rgName -ErrorVariable isIPExist -ErrorAction SilentlyContinue `
+Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName -ErrorVariable isIPExist -ErrorAction SilentlyContinue `
 
 
-If ($isIPExist) {
-    "Public IP does not exist"
+If ($isIPExist) 
+{
+    Write-Output "Public IP does not exist"
+    
+    Write-Verbose "Creating new Public IP: {$publicIpName}"
+
 
     $publicIP = New-AzureRmPublicIpAddress `
-                -Name $publicIpFullName `
+                -Name $publicIpName `
                 -ResourceGroupName $rgName `
                 -Location $location `
                 -AllocationMethod 'Static' `  ## 'Static' 'Dynamic'
                 -DomainNameLabel $dnsPrefix  `  ## optional
                 -Tag $tags
+} 
+Else 
+{
+    Write-Output "Public IP exist"
 
-} Else {
-    "Public IP exist"
+    Write-Verbose "Fetching Public IP: {$publicIpName}"
+
 
     $publicIP = Get-AzureRmPublicIpAddress `
-                -Name $publicIpFullName `
+                -Name $publicIpName `
                 -ResourceGroupName $rgName
 }
 
 
 
-# Get list of Public IPs
+
+Write-Verbose "Get list of Public IPs"
+
+Write-Output "Public IP"
+
 
 Get-AzureRmPublicIpAddress -ResourceGroupName $rgName `
 | Select-Object Name, ResourceGroupName, Location `
@@ -68,4 +62,16 @@ Get-AzureRmPublicIpAddress `
     | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
 
 #>
+
+
+
+
+
+<#
+
+https://docs.microsoft.com/en-us/powershell/module/azurerm.network/new-azurermpublicipaddress?view=azurermps-6.13.0
+https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermpublicipaddress?view=azurermps-6.13.0
+
+#>
+
 
