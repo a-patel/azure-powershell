@@ -1,6 +1,6 @@
 
 
-<# Create an Azure Availability Set for VM high availability, if it doesn't exist #>
+<# Azure Availability #>
 
 
 # Variables - Availability Set
@@ -10,6 +10,8 @@ $avSetSuffix = "-as"
 $asName = "${asShortName}${avSetSuffix}"
 
 
+
+<# Create an Azure Availability Set for VM high availability, if it does not exist #>
 
 Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName -ErrorVariable isASExist -ErrorAction SilentlyContinue `
 
