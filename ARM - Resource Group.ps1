@@ -22,7 +22,7 @@ $tags.Add("dataProfile", "Public")             # Public, Confidential, Restricte
 
 
 
-<# Create Resource Group, if it does not exist #>
+<# Resource Group #>
 
 
 # Variables - Resource Group
@@ -32,6 +32,8 @@ $rgSuffix = "-rg"
 $rgName = "${rgShortName}${rgSuffix}"
 
 
+
+<# Create Resource Group, if it does not exist #>
 
 Get-AzureRmResourceGroup -Name $rgName -ErrorVariable isRGExist -ErrorAction SilentlyContinue `
 
@@ -68,14 +70,11 @@ Get-AzureRmResourceGroup | Select-Object ResourceGroupName, Location `
                          | Format-Table -AutoSize -Wrap -GroupBy Location
 
 
-
-
-
-
 <#
 
 https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
 https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
+https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/remove-azurermresourcegroup?view=azurermps-6.13.0
 
 # Naming Conventions
 https://docs.microsoft.com/en-us/azure/architecture/best-practices/naming-conventions
