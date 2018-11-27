@@ -1,5 +1,5 @@
 
-<# Create Public IP Address, if it does not exist #>
+<# Public IP Address #>
 
 
 # Variables - Public IP
@@ -7,8 +7,10 @@
 $publicIpShortName = "aabbccdd12"
 $publicIpSuffix = "-ip"
 $publicIpName = "${publicIpShortName}${publicIpSuffix}"
-$dnsPrefix  = "this"
+$dnsPrefix  = "thisissparta12"
 
+
+<# Create Public IP Address, if it does not exist #>
 
 Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName -ErrorVariable isIPExist -ErrorAction SilentlyContinue `
 
