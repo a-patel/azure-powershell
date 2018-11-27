@@ -1,5 +1,5 @@
 
-<# Create Network Security Group (NSG), if it does not exist - Rules below are example placeholders that allow selected traffic from all sources #>
+<# Network Security Group (NSG) #>
 
 
 # Variables - Network Security Group
@@ -8,6 +8,8 @@ $nsgShortName = "aabbccdd44"
 $nsgSuffix = "-nsg"
 $nsgName = "${nsgShortName}${nsgSuffix}"
 
+
+<# Create Network Security Group (NSG), if it does not exist - Rules below are example placeholders that allow selected traffic from all sources #>
 
 Get-AzureRmNetworkSecurityGroup -Name $nsgName -ResourceGroupName $rgName -ErrorVariable isNSGExist -ErrorAction SilentlyContinue `
 
@@ -65,7 +67,7 @@ Else
     Write-Verbose "Fetching Network Security Group: {$nsgName}"
 
 
-    $nsg = Get-AzureRmNetworkSecurityGroup ` 
+    $nsg = Get-AzureRmNetworkSecurityGroup `
         -Name $nsgName `
         -ResourceGroupName $rgName
 }
