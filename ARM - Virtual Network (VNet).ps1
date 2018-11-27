@@ -1,5 +1,5 @@
 
-<# Create Virtual Network, if it does not exist #>
+<# Virtual Network (VNet) #>
 
 
 # Variables - Virtual Network
@@ -9,6 +9,8 @@ $vnetSuffix = "-vent"
 $vnetName = "${vnetShortName}${vnetSuffix}"
 
 
+
+<# Create Virtual Network (VNet), if it does not exist #>
 
 Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName -ErrorVariable isVNetExist -ErrorAction SilentlyContinue `
 
@@ -62,7 +64,7 @@ Else
 
 
 
-Write-Verbose Get list of all VNets
+Write-Verbose "Get list of all VNets"
 Write-Output "Virtual Networks"
 
 
