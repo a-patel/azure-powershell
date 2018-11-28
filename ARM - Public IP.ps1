@@ -4,10 +4,11 @@
 
 # Variables - Public IP
 
-$publicIpShortName = "aabbccdd12"
+$publicIpShortName = "qweasdzxc"
 $publicIpSuffix = "-ip"
 $publicIpName = "${publicIpShortName}${publicIpSuffix}"
-$dnsPrefix  = "thisissparta12"
+$dnsPrefix  = "qweasdzxc$(Get-Random)"
+#$dnsPrefix  = "qweasdzxc$(Get-Random)"
 
 
 <# Create Public IP Address, if it does not exist #>
@@ -22,13 +23,15 @@ If ($isIPExist)
     Write-Verbose "Creating new Public IP: {$publicIpName}"
 
 
-    $publicIP = New-AzureRmPublicIpAddress `
+    $publicIp = New-AzureRmPublicIpAddress `
                 -Name $publicIpName `
                 -ResourceGroupName $rgName `
                 -Location $location `
-                -AllocationMethod 'Static' `  ## 'Static' 'Dynamic'
-                -DomainNameLabel $dnsPrefix  `  ## optional
+                -AllocationMethod 'Static' `
+                -DomainNameLabel $dnsPrefix  `
                 -Tag $tags
+                
+# -AllocationMethod 'Static' `  ## 'Static' 'Dynamic'
 } 
 Else 
 {
@@ -37,7 +40,7 @@ Else
     Write-Verbose "Fetching Public IP: {$publicIpName}"
 
 
-    $publicIP = Get-AzureRmPublicIpAddress `
+    $publicIp = Get-AzureRmPublicIpAddress `
                 -Name $publicIpName `
                 -ResourceGroupName $rgName
 }
@@ -51,8 +54,8 @@ Write-Output "Public IP"
 
 
 Get-AzureRmPublicIpAddress -ResourceGroupName $rgName `
-| Select-Object Name, ResourceGroupName, Location `
-| Format-Table -AutoSize -Wrap
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -Wrap
 
 
 
