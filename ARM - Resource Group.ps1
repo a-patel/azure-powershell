@@ -27,7 +27,7 @@ $tags.Add("dataProfile", "Public")             # Public, Confidential, Restricte
 
 # Variables - Resource Group
 
-$rgShortName = "aabbccddff"
+$rgShortName = "qweasdzxc"
 $rgSuffix = "-rg"
 $rgName = "${rgShortName}${rgSuffix}"
 
@@ -48,6 +48,7 @@ If ($isRGExist)
     $rg = New-AzureRmResourceGroup `
             -Name $rgName `
             -Location $location `
+            -Tag $tags
 } 
 Else 
 {
@@ -68,6 +69,23 @@ Write-Output "Resource Groups"
 
 Get-AzureRmResourceGroup | Select-Object ResourceGroupName, Location `
                          | Format-Table -AutoSize -Wrap -GroupBy Location
+
+
+<#
+
+$rgShortName = "aabbccddff"
+$rgSuffix = "-rg"
+$rgName = "${rgShortName}${rgSuffix}"
+
+
+Write-Verbose "Delete Resource Group: {$rgName}"
+
+$jobRGDelete = Remove-AzureRmResourceGroup -Name $rgName -Force -AsJob
+
+$jobRGDelete
+
+#>
+
 
 
 <#
