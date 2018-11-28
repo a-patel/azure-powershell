@@ -1,4 +1,4 @@
-﻿
+
 <# Subnet #>
 
 
@@ -77,6 +77,26 @@ Get-AzureRmVirtualNetworkSubnetConfig -VirtualNetwork $vnet `
 
 
 
+
+<#
+
+Write-Verbose "Fetching Virtual Network: {$vnetName}"
+
+$vnet = Get-AzureRmVirtualNetwork `
+        -Name $vnetName `
+        -ResourceGroupName $rgName
+
+
+Write-Verbose "Removing Subnet: {$subnetName}"
+
+Remove-AzureRmVirtualNetworkSubnetConfig `
+            -Name $subnetName `
+            -VirtualNetwork $vnet
+
+# updates the existing virtual network with the new subnet.
+$vnet | Set-AzureRmVirtualNetwork
+
+#>
 
 
 <#
