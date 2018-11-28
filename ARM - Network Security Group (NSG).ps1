@@ -4,7 +4,7 @@
 
 # Variables - Network Security Group
 
-$nsgShortName = "aabbccdd44"
+$nsgShortName = "qweasdzxc"
 $nsgSuffix = "-nsg"
 $nsgName = "${nsgShortName}${nsgSuffix}"
 
@@ -20,33 +20,64 @@ If ($isNSGExist)
     
 
 
-    Write-Verbose "Creating new Network Security Rule: {allow-rdp-inbound}"
+    Write-Verbose "Creating network security rule to Allow Inbound HTTP (Port: 80): {HTTP}"
 
-    $nsgRule1 = New-AzureRmNetworkSecurityRuleConfig `
-        -Name "allow-rdp-inbound" `
-        -Description "Allow Inbound RDP" `
-        -SourceAddressPrefix * `
-        -DestinationAddressPrefix * `
-        -Protocol Tcp `
-        -SourcePortRange * `
-        -DestinationPortRange 3389 `
-        -Direction Inbound `
-        -Access Allow `
-        -Priority 100
-
-    Write-Verbose "Creating new Network Security Rule: {allow-http-inbound}"
-
-    $nsgRule2 = New-AzureRmNetworkSecurityRuleConfig `
-        -Name "allow-http-inbound" `
+    $nsgRuleHTTP = New-AzureRmNetworkSecurityRuleConfig `
+        -Name "HTTP" `
         -Description "Allow Inbound HTTP" `
+        -DestinationPortRange 80 `
+        -Priority 100 `
+        -Access Allow `
+        -Direction Inbound `
+        -Protocol Tcp `
         -SourceAddressPrefix * `
         -DestinationAddressPrefix * `
-        -Protocol Tcp `
         -SourcePortRange * `
-        -DestinationPortRange 80 `
-        -Direction Inbound `
+
+    
+    Write-Verbose "Creating network security rule to Allow Inbound HTTPS (Port: 443): {HTTPS}"
+
+    $nsgRuleHTTPS = New-AzureRmNetworkSecurityRuleConfig `
+        -Name "HTTPS" `
+        -Description "Allow Inbound HTTPS" `
+        -DestinationPortRange 443 `
+        -Priority 110 `
         -Access Allow `
-        -Priority 110
+        -Direction Inbound `
+        -Protocol Tcp `
+        -SourceAddressPrefix * `
+        -DestinationAddressPrefix * `
+        -SourcePortRange * `
+
+
+    Write-Verbose "Creating network security rule to Allow Inbound RDP (Port: 3389): {RDP}"
+
+    $nsgRuleRDP = New-AzureRmNetworkSecurityRuleConfig `
+        -Name "RDP" `
+        -Description "Allow Inbound RDP" `
+        -DestinationPortRange 3389 `
+        -Priority 400 `
+        -Access Allow `
+        -Direction Inbound `
+        -Protocol Tcp `
+        -SourceAddressPrefix * `
+        -DestinationAddressPrefix * `
+        -SourcePortRange * `
+
+
+    Write-Verbose "Creating network security rule to Allow Inbound SSH (Port: 22): {SSH}"
+
+    $nsgRuleSSH = New-AzureRmNetworkSecurityRuleConfig `
+        -Name "SSH" `
+        -Description "Allow Inbound SSH" `
+        -DestinationPortRange 22 `
+        -Priority 500 `
+        -Access Allow `
+        -Direction Inbound `
+        -Protocol Tcp `
+        -SourceAddressPrefix * `
+        -DestinationAddressPrefix * `
+        -SourcePortRange * `
 
 
 
@@ -56,7 +87,7 @@ If ($isNSGExist)
         -Name $nsgName `
         -ResourceGroupName $rgName `
         -Location $location `
-        -SecurityRules $nsgRule1, $nsgRule2 `
+        -SecurityRules $nsgRuleHTTP, $nsgRuleHTTPS, $nsgRuleRDP, $nsgRuleSSH `
         -Tag $tags
 } 
 Else 
