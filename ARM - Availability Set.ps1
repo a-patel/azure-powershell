@@ -1,11 +1,43 @@
 
+## To Set Verbose output
+$PSDefaultParameterValues['*:Verbose'] = $true
+
+
+
+# Variables - Common
+
+$location = "eastus2"
+
+
+$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
+$tags.Add("environment", "Production")         # Production, Staging, QA
+$tags.Add("projectName", "Demo Project")
+$tags.Add("projectVersion", "1.0.0")
+$tags.Add("managedBy", "developer.aashishpatel@gmail.com")
+$tags.Add("billTo", "Ashish Patel")
+$tags.Add("tier", "Front End")                 # Front End, Back End, Data
+$tags.Add("dataProfile", "Public")             # Public, Confidential, Restricted, Internal
+
+
+
+
+
+<# Resource Group #>
+
+
+# Variables - Resource Group
+
+$rgShortName = "qweasdzxc"
+$rgSuffix = "-rg"
+$rgName = "${rgShortName}${rgSuffix}"
+
 
 <# Azure Availability #>
 
 
 # Variables - Availability Set
 
-$asShortName = "aabbccdd12"
+$asShortName = "qweasdzxc"
 $avSetSuffix = "-as"
 $asName = "${asShortName}${avSetSuffix}"
 
@@ -22,10 +54,17 @@ If ($isASExist)
     Write-Verbose "Creating new Availability Set: {$asName}"
 
 
-    $avSet = New-AzureRmAvailabilitySet `
+    $as = New-AzureRmAvailabilitySet `
                 -Name $asName `
                 -ResourceGroupName $rgName `
-                -Location $location
+                -Location $location `
+                -Sku Aligned `
+                -PlatformFaultDomainCount  2 `
+                -PlatformUpdateDomainCount 5 `
+                
+# -Tags $tags `
+
+# -Sku 'Aligned' ` # Aligned: For managed disks or Classic: For unmanaged disks
 } 
 Else 
 {
@@ -34,7 +73,7 @@ Else
     Write-Verbose "Fetching Availability Set: {$asName}"
 
 
-    $avSet = Get-AzureRmAvailabilitySet `
+    $as = Get-AzureRmAvailabilitySet `
                 -Name $asName `
                 -ResourceGroupName $rgName
 }
@@ -67,6 +106,7 @@ Get-AzureRmAvailabilitySet -ResourceGroupName $rgName `
 
 <#
 
+https://docs.microsoft.com/en-us/powershell/module/azurerm.compute/new-azurermavailabilityset?view=azurermps-6.13.0
 https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
 https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/get-azurermresourcegroup?view=azurermps-6.13.0
 
