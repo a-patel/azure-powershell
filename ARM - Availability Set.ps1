@@ -1,38 +1,5 @@
 
-## To Set Verbose output
-$PSDefaultParameterValues['*:Verbose'] = $true
-
-
-
-# Variables - Common
-
-$location = "eastus2"
-
-
-$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
-$tags.Add("environment", "Production")         # Production, Staging, QA
-$tags.Add("projectName", "Demo Project")
-$tags.Add("projectVersion", "1.0.0")
-$tags.Add("managedBy", "developer.aashishpatel@gmail.com")
-$tags.Add("billTo", "Ashish Patel")
-$tags.Add("tier", "Front End")                 # Front End, Back End, Data
-$tags.Add("dataProfile", "Public")             # Public, Confidential, Restricted, Internal
-
-
-
-
-
-<# Resource Group #>
-
-
-# Variables - Resource Group
-
-$rgShortName = "qweasdzxc"
-$rgSuffix = "-rg"
-$rgName = "${rgShortName}${rgSuffix}"
-
-
-<# Azure Availability #>
+<# Availability Set #>
 
 
 # Variables - Availability Set
@@ -51,8 +18,8 @@ If ($isASExist)
 {
     Write-Output "Availability Set does not exist"
     
-    Write-Verbose "Creating new Availability Set: {$asName}"
 
+    Write-Verbose "Creating new Availability Set: {$asName}"
 
     $as = New-AzureRmAvailabilitySet `
                 -Name $asName `
@@ -70,25 +37,22 @@ Else
 {
     Write-Output "Availability Set exist"
 
+
     Write-Verbose "Fetching Availability Set: {$asName}"
 
-
-    $as = Get-AzureRmAvailabilitySet `
-                -Name $asName `
-                -ResourceGroupName $rgName
+    $as = Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName
 }
 
 
 
 
 Write-Verbose "Get list of Availability Set"
-
 Write-Output "Availability Sets"
 
 
 Get-AzureRmAvailabilitySet -ResourceGroupName $rgName `
     | Select-Object Name, ResourceGroupName, Location `
-    | Format-Table -AutoSize -GroupBy ResourceGroupName -Wrap 
+    | Format-Table -AutoSize -Wrap 
 
 
 <#
@@ -99,6 +63,22 @@ Get-AzureRmAvailabilitySet -ResourceGroupName $rgName `
 
 #>
 
+
+
+<#
+
+## Remove Availability Set
+
+$asShortName = "qweasdzxc"
+$avSetSuffix = "-as"
+$asName = "${asShortName}${avSetSuffix}"
+
+
+Write-Verbose "Deleting Availability Set: {$asName}"
+
+Remove-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName -Force
+
+#>
 
 
 
