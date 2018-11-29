@@ -81,26 +81,23 @@ If ($isNSGExist)
 
 
 
-    Write-Verbose "Creating new Network Security Group: {$nsgName}"
+    Write-Verbose "Creating Network Security Group: {$nsgName}"
 
     $nsg = New-AzureRmNetworkSecurityGroup `
-        -Name $nsgName `
-        -ResourceGroupName $rgName `
-        -Location $location `
-        -SecurityRules $nsgRuleHTTP, $nsgRuleHTTPS, $nsgRuleRDP, $nsgRuleSSH `
-        -Tag $tags
+            -Name $nsgName `
+            -ResourceGroupName $rgName `
+            -Location $location `
+            -SecurityRules $nsgRuleHTTP, $nsgRuleHTTPS, $nsgRuleRDP, $nsgRuleSSH `
+            -Tag $tags
 } 
 Else 
 {
-
     Write-Output "Network Security Group exist"
+
 
     Write-Verbose "Fetching Network Security Group: {$nsgName}"
 
-
-    $nsg = Get-AzureRmNetworkSecurityGroup `
-        -Name $nsgName `
-        -ResourceGroupName $rgName
+    $nsg = Get-AzureRmNetworkSecurityGroup -Name $nsgName -ResourceGroupName $rgName
 }
 
 
@@ -112,8 +109,7 @@ Write-Output "Network Security Groups"
 
 Get-AzureRmNetworkSecurityGroup -ResourceGroupName $rgName `
     | Select-Object Name, ResourceGroupName, Location `
-    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
-
+    | Format-Table -AutoSize -Wrap
 
 
 <#
@@ -126,8 +122,26 @@ Get-AzureRmNetworkSecurityGroup `
 
 
 
+<#
+
+## Remove Network Security Group (NSG)
+
+$nsgShortName = "qweasdzxc"
+$nsgSuffix = "-nsg"
+$nsgName = "${nsgShortName}${nsgSuffix}"
+
+
+Write-Verbose "Deleting Network Security Group (NSG): {$nsgName}"
+
+Remove-AzureRmNetworkSecurityGroup -Name $nsgName -ResourceGroupName $rgName -Force
+
+#>
+
+
+
 
 <#
+## References
 
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermnetworksecuritygroup?view=azurermps-6.13.0
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermnetworksecurityruleconfig?view=azurermps-6.13.0&viewFallbackFrom=azurermps-6.12.0
