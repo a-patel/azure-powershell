@@ -7,7 +7,7 @@
 $publicIpShortName = "qweasdzxc"
 $publicIpSuffix = "-ip"
 $publicIpName = "${publicIpShortName}${publicIpSuffix}"
-$dnsPrefix  = "qweasdzxc$(Get-Random)"
+$dnsPrefix  = "qweasdzxc"
 #$dnsPrefix  = "qweasdzxc$(Get-Random)"
 
 
@@ -20,8 +20,8 @@ If ($isIPExist)
 {
     Write-Output "Public IP does not exist"
     
-    Write-Verbose "Creating new Public IP: {$publicIpName}"
 
+    Write-Verbose "Creating Public IP: {$publicIpName}"
 
     $publicIp = New-AzureRmPublicIpAddress `
                 -Name $publicIpName `
@@ -37,26 +37,22 @@ Else
 {
     Write-Output "Public IP exist"
 
+
     Write-Verbose "Fetching Public IP: {$publicIpName}"
 
-
-    $publicIp = Get-AzureRmPublicIpAddress `
-                -Name $publicIpName `
-                -ResourceGroupName $rgName
+    $publicIp = Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName
 }
 
 
 
 
 Write-Verbose "Get list of Public IPs"
-
 Write-Output "Public IP"
 
 
 Get-AzureRmPublicIpAddress -ResourceGroupName $rgName `
     | Select-Object Name, ResourceGroupName, Location `
     | Format-Table -AutoSize -Wrap
-
 
 
 
@@ -71,8 +67,26 @@ Get-AzureRmPublicIpAddress `
 
 
 
+<#
+
+## Remove Public Ip
+
+$publicIpShortName = "qweasdzxc"
+$publicIpSuffix = "-ip"
+$publicIpName = "${publicIpShortName}${publicIpSuffix}"
+
+
+Write-Verbose "Deleting Public Ip: {$publicIpName}"
+
+Remove-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName -Force
+
+#>
+
+
+
 
 <#
+## References
 
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/new-azurermpublicipaddress?view=azurermps-6.13.0
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermpublicipaddress?view=azurermps-6.13.0
