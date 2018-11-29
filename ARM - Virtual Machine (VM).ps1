@@ -33,8 +33,25 @@ $rgSuffix = "-rg"
 $rgName = "${rgShortName}${rgSuffix}"
 
 
-<# Public IP Address #>
+<# Virtual Network (VNet) #>
 
+<#
+
+
+#>
+
+
+# Variables - Virtual Network
+
+$vnetShortName = "qweasdzxc"
+$vnetSuffix = "-vnet"
+$vnetName = "${vnetShortName}${vnetSuffix}"
+
+# subnets
+$webSubnetName = "WebSubnet"
+$frontendSubnetName = "FrontEndSubnet"
+$backendSubnetName = "BackEndSubnet"
+$gatewaySubnetName = "GatewaySubnet"
 
 # Variables - Public IP
 
@@ -42,15 +59,38 @@ $publicIpShortName = "qweasdzxc"
 $publicIpSuffix = "-ip"
 $publicIpName = "${publicIpShortName}${publicIpSuffix}"
 $dnsPrefix  = "qweasdzxc"
+#$dnsPrefix  = "qweasdzxc$(Get-Random)"
 
-<# Virtual Network (VNet) #>
+# Variables - Network Security Group
+
+$nsgShortName = "qweasdzxc"
+$nsgSuffix = "-nsg"
+$nsgName = "${nsgShortName}${nsgSuffix}"
 
 
-# Variables - Virtual Network
 
-$vnetShortName = "qweasdzxc"
-$vnetSuffix = "-vent"
-$vnetName = "${vnetShortName}${vnetSuffix}"
+
+<# Network Interface (NIC) #>
+
+<#
+
+Virtual Network (VNet)
+Subnet
+Public IP address
+Network Security Group (NSG) 
+
+#>
+
+
+# Variables - Network Interface (NIC)
+
+$nicShortName = "qweasdzxc"
+$nicSuffix = "-nic"
+$nicName = "${nicShortName}${nicSuffix}"
+
+$subnetName = "WebSubnet"
+
+
 
 
 
@@ -60,15 +100,13 @@ $vnetName = "${vnetShortName}${vnetSuffix}"
 
 # Variables - Virtul Machine
 
-$vmShortName = "TestVM"
-$vmSuffix = ""
+$vmShortName = "Test"
+$vmSuffix = "VM"
 $vmName = "${vmShortName}${vmSuffix}"
 
 $username = "aashish"
 $password = "Password@1234"
 
-
-$nicName = "mynic"
 
 $vmSize = "Standard_D1"
 $vmSKU = "2016-Datacenter"
@@ -76,8 +114,12 @@ $vmSKU = "2016-Datacenter"
 # linux virtual machine
 # $vmSKU = "14.04.2-LTS"
 
+<#
+# way 2
+
 $vmImageName = "Win2016Datacenter"
 $openPorts = "80,443,3389,22"
+#>
 
 
 
@@ -91,45 +133,14 @@ If ($isVMExist)
     Write-Output "Virtul Machine does not exist"
 
 
-    # virtual network
-    Write-Verbose "Fetching Virtual Network: {$vnetName}"
-
-    $vnet = Get-AzureRmVirtualNetwork `
-            -Name $vnetName `
-            -ResourceGroupName $rgName
-
-
-
-    # public IP address 
-    Write-Verbose "Fetching Public IP: {$publicIpName}"
-
-    $publicIp = Get-AzureRmPublicIpAddress `
-                -Name $publicIpName `
-                -ResourceGroupName $rgName
-
-
-    # network security group 
-    Write-Verbose "Fetching Network Security Group: {$nsgName}"
-
-    $nsg = Get-AzureRmNetworkSecurityGroup `
-        -Name $nsgName `
-        -ResourceGroupName $rgName
-
-
-
-    # Create a virtual network card and associate with public IP address and NSG
+    # Network Interface (NIC)
     Write-Verbose "Creating Network Interface (NIC): {$nicName}"
 
-    #$nic = Get-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName
-    $nic = New-AzureRmNetworkInterface `
-                -Name $nicName `
-                -ResourceGroupName $rgName `
-                -Location $location `
-                -SubnetId $vnet.Subnets[0].Id `
-                -PublicIpAddressId $pip.Id `
-                -NetworkSecurityGroupId $nsg.Id
+    $nic = Get-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName
 
 
+
+    # Availability Set (AS)
     Write-Verbose "Fetching Availability Set: {$asName}"
 
     $as = Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName
@@ -141,9 +152,9 @@ If ($isVMExist)
     $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $username, $passwordSecure
 
     <#
-    # ask for username and password prompt
-    Write-Output "Enter a username and password for the virtual machine"
-    $cred = Get-Credential -Message "Enter a username and password for the virtual machine."
+        # ask for username and password prompt
+        Write-Output "Enter a username and password for the virtual machine"
+        $cred = Get-Credential -Message "Enter a username and password for the virtual machine."
     #>
 
 
@@ -153,9 +164,9 @@ If ($isVMExist)
     Write-Verbose "Creating a Virtul Machine: {$vmName}"
 
     $vmConfig = New-AzureRmVMConfig `
-                    -AvailabilitySetId $as.Id `
                     -VMName $vmName `
-                    -VMSize $vmSize | `
+                    -VMSize $vmSize `
+                    -AvailabilitySetId $as.Id | `
     Set-AzureRmVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred | `
     Set-AzureRmVMSourceImage -PublisherName MicrosoftWindowsServer -Offer WindowsServer -Skus $vmSKU -Version latest | `
     Add-AzureRmVMNetworkInterface -Id $nic.Id
