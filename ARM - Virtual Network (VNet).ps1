@@ -1,12 +1,23 @@
 
 <# Virtual Network (VNet) #>
 
+<#
+
+
+#>
+
 
 # Variables - Virtual Network
 
 $vnetShortName = "qweasdzxc"
-$vnetSuffix = "-vent"
+$vnetSuffix = "-vnet"
 $vnetName = "${vnetShortName}${vnetSuffix}"
+
+# subnets
+$webSubnetName = "WebSubnet"
+$frontendSubnetName = "FrontEndSubnet"
+$backendSubnetName = "BackEndSubnet"
+$gatewaySubnetName = "GatewaySubnet"
 
 
 
@@ -21,16 +32,12 @@ If ($isVNetExist)
     
 
     
-    $webSubnetName = "WebSubnet"
-    
     Write-Verbose "Creating new subnet: {$webSubnetName}"
 
     $webSubnet = New-AzureRmVirtualNetworkSubnetConfig `
         -Name $webSubnetName `
         -AddressPrefix "10.0.0.0/24"
 
-
-    $frontendSubnetName = "FrontEndSubnet"
     
     Write-Verbose "Creating new subnet: {$frontendSubnetName}"
 
@@ -38,8 +45,6 @@ If ($isVNetExist)
         -Name $frontendSubnetName `
         -AddressPrefix "10.0.1.0/24"
 
-        
-    $backendSubnetName = "BackEndSubnet"
     
     Write-Verbose "Creating new subnet: {$backendSubnetName}"
 
@@ -47,8 +52,6 @@ If ($isVNetExist)
         -Name $backendSubnetName `
         -AddressPrefix "10.0.2.0/24"
 
-
-    $gatewaySubnetName = "GatewaySubnet"
 
     Write-Verbose "Creating new subnet: {$gatewaySubnetName}"
 
