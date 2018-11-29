@@ -30,21 +30,21 @@ If ($isVNetExist)
         -AddressPrefix "10.0.0.0/24"
 
 
-    $frontEndSubnetName = "FrontEndSubnet"
+    $frontendSubnetName = "FrontEndSubnet"
     
-    Write-Verbose "Creating new subnet: {$frontEndSubnetName}"
+    Write-Verbose "Creating new subnet: {$frontendSubnetName}"
 
-    $frontEndSubnet = New-AzureRmVirtualNetworkSubnetConfig `
-        -Name $frontEndSubnetName `
+    $frontendSubnet = New-AzureRmVirtualNetworkSubnetConfig `
+        -Name $frontendSubnetName `
         -AddressPrefix "10.0.1.0/24"
 
         
-    $backEndSubnetName = "BackEndSubnet"
+    $backendSubnetName = "BackEndSubnet"
     
-    Write-Verbose "Creating new subnet: {$backEndSubnetName}"
+    Write-Verbose "Creating new subnet: {$backendSubnetName}"
 
-    $backEndSubnet = New-AzureRmVirtualNetworkSubnetConfig `
-        -Name $backEndSubnetName `
+    $backendSubnet = New-AzureRmVirtualNetworkSubnetConfig `
+        -Name $backendSubnetName `
         -AddressPrefix "10.0.2.0/24"
 
 
@@ -65,46 +65,62 @@ If ($isVNetExist)
               -ResourceGroupName $rgName `
               -Location $location `
               -AddressPrefix 10.0.0.0/16 `
-              -Subnet $webSubnet, $frontEndSubnet, $backEndSubnet, $gatewaySubnet `
+              -Subnet $webSubnet, $frontendSubnet, $backendSubnet, $gatewaySubnet `
               -Tag $tags
 }
 Else 
 {
     Write-Output "Virtual Network exist"
 
+
     Write-Verbose "Fetching Virtual Network: {$vnetName}"
 
-
-    $vnet = Get-AzureRmVirtualNetwork `
-            -Name $vnetName `
-            -ResourceGroupName $rgName
+    $vnet = Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName
 }
 
 
 
-Write-Verbose "Get list of all VNets"
-Write-Output "Virtual Networks"
+Write-Verbose "Get list of all Virtual Network (VNet)"
+Write-Output "Virtual Networks (VNet)"
 
 
 Get-AzureRmVirtualNetwork -ResourceGroupName $rgName `
     | Select-Object Name, ResourceGroupName, Location `
-    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
+    | Format-Table -AutoSize -Wrap 
 
 
 <#
 
 Get-AzureRmVirtualNetwork `
     | Select-Object Name, ResourceGroupName, Location `
-    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
+    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName 
+
+#>
+
+
+
+<#
+
+## Remove Virtual Network (VNet)
+
+$vnetShortName = "qweasdzxc"
+$vnetSuffix = "-vent"
+$vnetName = "${vnetShortName}${vnetSuffix}"
+
+
+Write-Verbose "Deleting Virtual Network (VNet): {$vnetName}"
+
+Remove-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName -Force
 
 #>
 
 
 
 
-
 <#
+## References
 
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/tutorial-virtual-network
 https://docs.microsoft.com/en-us/azure/virtual-network/quick-create-powershell
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermvirtualnetwork?view=azurermps-6.13.0
 https://github.com/robotechredmond/Azure-PowerShell-Snippets/blob/master/Azure%20Resource%20Manager%20-%20Create%20V2%20environment%20w%20VNET%20GW%20demo.ps1
