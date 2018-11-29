@@ -46,16 +46,12 @@ Else
 
     Write-Verbose "Fetching Virtual Network: {$vnetName}"
 
-    $vnet = Get-AzureRmVirtualNetwork `
-            -Name $vnetName `
-            -ResourceGroupName $rgName
+    $vnet = Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName
 
 
     Write-Verbose "Fetching Subnet: {$subnetName}"
 
-    $subnet = Get-AzureRmVirtualNetworkSubnetConfig `
-            -Name $subnetName `
-            -VirtualNetwork $vnet
+    $subnet = Get-AzureRmVirtualNetworkSubnetConfig -Name $subnetName -VirtualNetwork $vnet
 }
 
 
@@ -66,10 +62,7 @@ Write-Output "Subnets"
 
 Write-Verbose "Fetching Virtual Network: {$vnetName}"
 
-$vnet = Get-AzureRmVirtualNetwork `
-        -Name $vnetName `
-        -ResourceGroupName $rgName
-
+$vnet = Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName
 
 Get-AzureRmVirtualNetworkSubnetConfig -VirtualNetwork $vnet `
     | Select-Object Name `
@@ -80,18 +73,22 @@ Get-AzureRmVirtualNetworkSubnetConfig -VirtualNetwork $vnet `
 
 <#
 
+## Remove Subnet from Virtual Network (VNet)
+
+$subnetShortName = "Test"
+$subnetSuffix = "subnet"
+$subnetName = "${subnetShortName}${subnetSuffix}"
+
+
 Write-Verbose "Fetching Virtual Network: {$vnetName}"
 
-$vnet = Get-AzureRmVirtualNetwork `
-        -Name $vnetName `
-        -ResourceGroupName $rgName
+$vnet = Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName
 
 
 Write-Verbose "Removing Subnet: {$subnetName}"
 
-Remove-AzureRmVirtualNetworkSubnetConfig `
-            -Name $subnetName `
-            -VirtualNetwork $vnet
+Remove-AzureRmVirtualNetworkSubnetConfig -Name $subnetName -VirtualNetwork $vnet
+
 
 # updates the existing virtual network with the new subnet.
 $vnet | Set-AzureRmVirtualNetwork
@@ -100,6 +97,7 @@ $vnet | Set-AzureRmVirtualNetwork
 
 
 <#
+## References
 
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/add-azurermvirtualnetworksubnetconfig?view=azurermps-6.13.0
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermvirtualnetworksubnetconfig?view=azurermps-6.13.0
