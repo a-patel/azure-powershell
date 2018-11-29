@@ -1,6 +1,5 @@
 
 
-
 ## To Set Verbose output
 $PSDefaultParameterValues['*:Verbose'] = $true
 
@@ -65,6 +64,10 @@ $vmShortName = "TestVM"
 $vmSuffix = ""
 $vmName = "${vmShortName}${vmSuffix}"
 
+$username = "aashish"
+$password = "Password@1234"
+
+
 $nicName = "mynic"
 
 $vmSize = "Standard_D1"
@@ -117,6 +120,7 @@ If ($isVMExist)
     # Create a virtual network card and associate with public IP address and NSG
     Write-Verbose "Creating Network Interface (NIC): {$nicName}"
 
+    #$nic = Get-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName
     $nic = New-AzureRmNetworkInterface `
                 -Name $nicName `
                 -ResourceGroupName $rgName `
@@ -128,15 +132,19 @@ If ($isVMExist)
 
     Write-Verbose "Fetching Availability Set: {$asName}"
 
-    $as = Get-AzureRmAvailabilitySet `
-                -Name $asName `
-                -ResourceGroupName $rgName
+    $as = Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName
 
 
 
     # Create user object (credential)
+    $passwordSecure = ConvertTo-SecureString -String $password -AsPlainText -Force
+    $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $username, $passwordSecure
+
+    <#
+    # ask for username and password prompt
     Write-Output "Enter a username and password for the virtual machine"
     $cred = Get-Credential -Message "Enter a username and password for the virtual machine."
+    #>
 
 
 
@@ -188,31 +196,31 @@ If ($isVMExist)
 #>
 
 
+
+<#
     # verify the Name of the VM and the admin account we created
     $vm.OSProfile | Select-Object ComputerName,AdminUserName
 
 
     #get specific information about the network configuration
-    $vm | Get-AzureRmNetworkInterface |
-          Select-Object -ExpandProperty IpConfigurations |
-          Select-Object Name,PrivateIpAddress
+    $vm | Get-AzureRmNetworkInterface | `
+          Select-Object -ExpandProperty IpConfigurations | `
+          Select-Object Name,PrivateIpAddress 
 
     # Get Public IP address
     $publicIp = Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName
 
     $publicIp | Select-Object Name, IpAddress, @{label='FQDN';expression={$_.DnsSettings.Fqdn}}
-
+#>
 } 
 Else 
 {
     Write-Output "Virtul Machine exist"
 
+
     Write-Verbose "Fetching Virtul Machine: {$vmName}"
 
-
-    $vm = Get-AzureRmVM `
-            -Name $vmName `
-            -ResourceGroupName $rgName
+    $vm = Get-AzureRmVM -Name $vmName -ResourceGroupName $rgName
 }
 
 
@@ -244,16 +252,25 @@ $vmName = "${vmShortName}${vmSuffix}"
 
 Write-Verbose "Delete Virtul Machine: {$vmName}"
 
-Remove-AzureRmVM -Name $vmName `
-    -Force
+$jobVMDelete = Remove-AzureRmVM -Name $vmName -ResourceGroupName $rgName -Force -AsJob
+
+$jobVMDelete
+
 
 #>
 
 
 <#
+## References
+
+# all resource in azure
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/tutorial-manage-vm
 
 https://docs.microsoft.com/en-us/powershell/azure/azureps-vm-tutorial?view=azurermps-6.13.0
 https://docs.microsoft.com/en-us/azure/virtual-machines/windows/powershell-samples?toc=%2fpowershell%2fmodule%2ftoc.json
+
+# credentials
+https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/get-credential?view=powershell-6
 
 # Load balance traffic between highly available virtual machines
 https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-windows-powershell-sample-create-nlb-vm?toc=%2fpowershell%2fmodule%2ftoc.json
