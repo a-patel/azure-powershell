@@ -1,8 +1,13 @@
 
 <# Network Security Group (NSG) #>
 
+<#
 
-# Variables - Network Security Group
+
+#>
+
+
+# Variables - Network Security Group (NSG)
 
 $nsgShortName = "qweasdzxc"
 $nsgSuffix = "-nsg"
