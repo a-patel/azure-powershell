@@ -1,6 +1,11 @@
 
 <# Subnet #>
 
+<#
+Virtual Network (VNet)
+
+#>
+
 
 # Variables - Subnet
 
@@ -26,15 +31,18 @@ If ($isSubnetExist)
 
 
     Write-Verbose "Fetching Virtual Network: {$vnetName}"
-    $vnet = Get-AzureRmVirtualNetwork `
-        -Name $vnetName `
-        -ResourceGroupName $rgName
 
+    $vnet = Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName
 
-    Write-Verbose "Creating new subnet: {$subnetName}"
 
     # add a subnet to the in-memory representation of the virtual network. 
-    Add-AzureRmVirtualNetworkSubnetConfig -Name $subnetName -VirtualNetwork $vnet -AddressPrefix $addressPrefix
+    Write-Verbose "Creating Subnet: {$subnetName}"
+
+    Add-AzureRmVirtualNetworkSubnetConfig ` 
+        -Name $subnetName `
+        -VirtualNetwork $vnet `
+        -AddressPrefix $addressPrefix
+
 
     # updates the existing virtual network with the new subnet.
     $vnet | Set-AzureRmVirtualNetwork
@@ -64,10 +72,10 @@ Write-Verbose "Fetching Virtual Network: {$vnetName}"
 
 $vnet = Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName
 
-Get-AzureRmVirtualNetworkSubnetConfig -VirtualNetwork $vnet `
-    | Select-Object Name `
-    | Format-Table -AutoSize -Wrap
 
+Get-AzureRmVirtualNetworkSubnetConfig -VirtualNetwork $vnet `
+    | Select-Object Name, AddressPrefix `
+    | Format-Table -AutoSize -Wrap
 
 
 
