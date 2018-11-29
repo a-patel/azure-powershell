@@ -75,16 +75,14 @@ Get-AzureRmResourceGroup `
 
 ## Remove Resource Group
 
-$rgShortName = "aabbccddff"
+$rgShortName = "qweasdzxc"
 $rgSuffix = "-rg"
 $rgName = "${rgShortName}${rgSuffix}"
 
 
 Write-Verbose "Delete Resource Group: {$rgName}"
 
-$jobRGDelete = Remove-AzureRmResourceGroup -Name $rgName -Force -AsJob
-
-$jobRGDelete
+Remove-AzureRmResourceGroup -Name $rgName -Force
 
 #>
 
