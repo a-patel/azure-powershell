@@ -166,6 +166,7 @@ If ($isVMExist)
     $vmConfig = New-AzureRmVMConfig `
                     -VMName $vmName `
                     -VMSize $vmSize `
+                    -Tag $tags `
                     -AvailabilitySetId $as.Id | `
     Set-AzureRmVMOperatingSystem -Windows -ComputerName $vmName -Credential $cred | `
     Set-AzureRmVMSourceImage -PublisherName MicrosoftWindowsServer -Offer WindowsServer -Skus $vmSKU -Version latest | `
@@ -241,7 +242,7 @@ Write-Output "Virtul Machines"
 
 
 Get-AzureRmVM -ResourceGroupName $rgName `
-    | Select-Object Name, ResourceGroupName, Location `
+    | Select-Object Name, Sku, FullyQualifiedDomainName, ResourceGroupName, Location `
     | Format-Table -AutoSize -Wrap
 
 
