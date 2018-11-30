@@ -133,9 +133,10 @@ If ($isNICExist)
                 -Name $nicName `
                 -ResourceGroupName $rgName `
                 -Location $location `
-                -SubnetId $subnet.Id `
-                -PublicIpAddressId $pip.Id `
-                -NetworkSecurityGroupId $nsg.Id
+                -Subnet $subnet `
+                -PublicIpAddress $publicIp `
+                -NetworkSecurityGroup $nsg `
+                -Tag $tags 
 } 
 Else 
 {
