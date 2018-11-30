@@ -1,4 +1,4 @@
-﻿
+
 ## To Set Verbose output
 $PSDefaultParameterValues['*:Verbose'] = $true
 
@@ -19,7 +19,6 @@ $tags.Add("tier", "Front End")                 # Front End, Back End, Data
 $tags.Add("dataProfile", "Public")             # Public, Confidential, Restricted, Internal
 
 
-
 $vmShortName = "Test"
 $vmSuffix = "VM"
 $vmName = "${vmShortName}${vmSuffix}"
@@ -29,25 +28,24 @@ $rgShortName = "qweasdzxc"
 $rgSuffix = "-rg"
 $rgName = "${rgShortName}${rgSuffix}"
 
+$diskShortName = "TEST1"
+$diskSuffix = "-DataDisk"
+$diskName = "${diskShortName}${diskSuffix}"
 
 
-<# Disk (Managed) #>
+
+<# Data Disk (Managed) #>
 
 <#
 
 Virtual Machine (VM)
+Data Disk
 
 #>
 
 # Variables - Disk (Managed)
 
-$diskShortName = "TEST1"
-$diskSuffix = "-DataDisk"
-$diskName = "${diskShortName}${diskSuffix}"
-
-$diskSizeGB = 128
-
-# attach to vm
+# logical unit number
 $lun = 1
 
 
@@ -69,18 +67,10 @@ If ($isDiskExist)
 
 
 
-    Write-Verbose "Creating Disk (Managed): {$diskName}"
+    Write-Verbose "Fetching Data Disk: {$diskName}"
 
-    $diskConfig = New-AzureRmDiskConfig `
-            -Location $location `
-            -DiskSizeGB $diskSizeGB `
-            -CreateOption Empty `
-            -Tag $tags 
+    $dataDisk = Get-AzureRmDisk -Name $diskName -ResourceGroupName $rgName 
 
-    $dataDisk = New-AzureRmDisk `
-            -DiskName $diskName `
-            -ResourceGroupName $rgName `
-            -Disk $diskConfig `
 
 
     # attach data disk to virtual machine
@@ -98,7 +88,7 @@ If ($isDiskExist)
 } 
 Else 
 {
-    Write-Output "Disk (Managed) exist"
+    Write-Output "Data Disk is attached to Virtul Machine"
 
 
     Write-Verbose "Fetching Disk (Managed): {$diskName}"
@@ -125,16 +115,48 @@ Get-AzureRmDisk `
 
 
 
-<#
-# References
 
-Prepare data disks
-Create an RDP connection with the virtual machine. Open up PowerShell and run this script.
+
+<#
+
+# Prepare data disks in VM
+# Create an RDP connection with the virtual machine. Open up PowerShell and run this script.
+
 
 Get-Disk | Where partitionstyle -eq 'raw' | `
 Initialize-Disk -PartitionStyle MBR -PassThru | `
 New-Partition -AssignDriveLetter -UseMaximumSize | `
-Format-Volume -FileSystem NTFS -NewFileSystemLabel "myDataDisk" -Confirm:$false
+Format-Volume -FileSystem NTFS -NewFileSystemLabel $diskName -Confirm:$false
+
+#>
+
+
+
+<#
+
+$vmShortName = "Test"
+$vmSuffix = "VM"
+$vmName = "${vmShortName}${vmSuffix}"
+
+
+$rgShortName = "qweasdzxc"
+$rgSuffix = "-rg"
+$rgName = "${rgShortName}${rgSuffix}"
+
+$diskShortName = "TEST1"
+$diskSuffix = "-DataDisk"
+$diskName = "${diskShortName}${diskSuffix}"
+
+
+
+Write-Verbose "Detach Data Disk from Virtul Machine: {$diskName}"
+
+Write-Verbose "Fetching Virtul Machine: {$vmName}"
+$vm = Get-AzureRmVM -Name $vmName -ResourceGroupName $rgName
+
+Remove-AzureRmVMDataDisk -VM $vm -Name $diskName
+
+Update-AzureRmVM -VM $vm -ResourceGroupName $rgName
 
 #>
 
@@ -144,23 +166,14 @@ Format-Volume -FileSystem NTFS -NewFileSystemLabel "myDataDisk" -Confirm:$false
 
 
 
-
 <#
-
-
-Write-Verbose "Delete Disk (Managed Data Disk): {$rgName}"
-
-$jobRGDelete = Remove-AzureRmResourceGroup -Name $rgName -Force -AsJob
-
-$jobRGDelete
-
-#>
-
-
-
-<#
+# References
 
 https://docs.microsoft.com/en-us/azure/virtual-machines/windows/tutorial-manage-data-disk
+
+
+# detach
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/detach-disk
 
 #>
 
