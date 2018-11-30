@@ -88,8 +88,6 @@ Remove-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName -Fo
 #>
 
 
-
-
 <#
 ## References
 
@@ -97,5 +95,3 @@ https://docs.microsoft.com/en-us/powershell/module/azurerm.network/new-azurermpu
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermpublicipaddress?view=azurermps-6.13.0
 
 #>
-
-
