@@ -27,14 +27,14 @@ If ($isASExist)
     Write-Verbose "Creating new Availability Set: {$asName}"
 
     $as = New-AzureRmAvailabilitySet `
-                -Name $asName `
-                -ResourceGroupName $rgName `
-                -Location $location `
-                -Sku Aligned `
-                -PlatformFaultDomainCount  2 `
-                -PlatformUpdateDomainCount 5 `
+            -Name $asName `
+            -ResourceGroupName $rgName `
+            -Location $location `
+            -Sku Aligned `
+            -PlatformFaultDomainCount  2 `
+            -PlatformUpdateDomainCount 5 `
+            -Tag $tags 
                 
-# -Tags $tags `
 
 # -Sku 'Aligned' ` # Aligned: For managed disks or Classic: For unmanaged disks
 } 
@@ -90,6 +90,7 @@ Remove-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName -Force
 
 
 <#
+# References
 
 https://docs.microsoft.com/en-us/powershell/module/azurerm.compute/new-azurermavailabilityset?view=azurermps-6.13.0
 https://docs.microsoft.com/en-us/powershell/module/azurerm.resources/new-azurermresourcegroup?view=azurermps-6.13.0
