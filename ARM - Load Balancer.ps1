@@ -1,6 +1,59 @@
 
+
+## To Set Verbose output
+$PSDefaultParameterValues['*:Verbose'] = $true
+
+
+
+# Variables - Common
+
+$location = "eastus2"
+
+
+$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
+$tags.Add("environment", "Production")         # Production, Staging, QA
+$tags.Add("projectName", "Demo Project")
+$tags.Add("projectVersion", "1.0.0")
+$tags.Add("managedBy", "developer.aashishpatel@gmail.com")
+$tags.Add("billTo", "Ashish Patel")
+$tags.Add("tier", "Front End")                 # Front End, Back End, Data
+$tags.Add("dataProfile", "Public")             # Public, Confidential, Restricted, Internal
+
+
+
+
+
+<# Resource Group #>
+
+
+# Variables - Resource Group
+
+$rgShortName = "qweasdzxc"
+$rgSuffix = "-rg"
+$rgName = "${rgShortName}${rgSuffix}"
+
+
+
+
+
+# Variables - Public IP
+
+$publicIpShortName = "qweasdzxcLB"
+$publicIpSuffix = "-ip"
+$publicIpName = "${publicIpShortName}${publicIpSuffix}"
+$dnsPrefix  = "qweasdzxclb"
+#$dnsPrefix  = "qweasdzxc$(Get-Random)"
+
+
+
+
 <# Load Balancer #>
 
+<#
+
+Public IP address
+
+#>
 
 # Variables - Load Balancer
 
@@ -11,12 +64,19 @@ $lbName = "${lbShortName}${lbSuffix}"
 $feName = "qweasdzxcFrontEndPool"
 $bepoolName = "qweasdzxcBackEndPool"
 $healthProbeName = "qweasdzxcHealthProbe"
+$healthProbeNameRequestPath = "/"
 $lbRuleName = "qweasdzxcLoadBalancerRuleWeb"
+$natRuleName = "RDP"
+$natRuleFrontEndPortStart = 4220
+$natRuleBackEndPort = 3389
+
+# linux vm
+#$natRuleName = "SSH"
 
 
 <# Create Load Balancer, if it does not exist #>
 
-Get-AzureRmResourceGroup -Name $lbName -ErrorVariable isLBExist -ErrorAction SilentlyContinue `
+Get-AzureRmLoadBalancer -Name $lbName -ResourceGroupName $rgName -ErrorVariable isLBExist -ErrorAction SilentlyContinue `
 
 
 If ($isLBExist) 
@@ -27,9 +87,7 @@ If ($isLBExist)
     # public IP address
     Write-Verbose "Fetching Public IP: {$publicIpName}"
 
-    $publicIp = Get-AzureRmPublicIpAddress `
-                -Name $publicIpName `
-                -ResourceGroupName $rgName
+    $publicIp = Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName 
 
 
 
@@ -45,31 +103,50 @@ If ($isLBExist)
 
     # Creates a load balancer probe on port 80.
     Write-Verbose "Creating a load balancer probe on port 80: {$healthProbeName}"
-    $probe = New-AzureRmLoadBalancerProbeConfig -Name $healthProbeName -Protocol Http -Port 80 `
-                -RequestPath / -IntervalInSeconds 360 -ProbeCount 5
+    $probe = New-AzureRmLoadBalancerProbeConfig `
+                -Name $healthProbeName `
+                -Protocol Http `
+                -Port 80 `
+                -RequestPath / `
+                -IntervalInSeconds 360 `
+                -ProbeCount 5
 
 
 
     # Creates a load balancer rule for port 80.
     Write-Verbose "Creating a load balancer rule for port 80: {$lbRuleName}"
-    $rule = New-AzureRmLoadBalancerRuleConfig `
-                -Name $lbRuleName ` 
+    $lbrule = New-AzureRmLoadBalancerRuleConfig `
+                -Name $lbRuleName `
+                -Probe $probe `
                 -Protocol Tcp `
-                -Probe $probe -FrontendPort 80 -BackendPort 80 `
+                -FrontendPort 80 -BackendPort 80 `
                 -FrontendIpConfiguration $feip -BackendAddressPool $bePool
 
 
 
-    # Create three NAT rules for port 3389.
-    Write-Verbose "Creating three NAT rules for port 3389: {$lbRuleName}"
-    $natrule1 = New-AzureRmLoadBalancerInboundNatRuleConfig -Name 'myLoadBalancerRDP1' -FrontendIpConfiguration $feip `
-      -Protocol tcp -FrontendPort 4221 -BackendPort 3389
+    # Create NAT rules.
+    Write-Verbose "Creating three NAT rules for port {$natRuleBackEndPort}: {$lbRuleName}"
 
-    $natrule2 = New-AzureRmLoadBalancerInboundNatRuleConfig -Name 'myLoadBalancerRDP2' -FrontendIpConfiguration $feip `
-      -Protocol tcp -FrontendPort 4222 -BackendPort 3389
+    $natrule1 = New-AzureRmLoadBalancerInboundNatRuleConfig `
+                    -Name "$($natRuleName)1" `
+                    -FrontendPort $($natRulePortStart + 1) `
+                    -BackendPort $natRuleBackEndPort `
+                    -FrontendIpConfiguration $feip `
+                    -Protocol tcp 
 
-    $natrule3 = New-AzureRmLoadBalancerInboundNatRuleConfig -Name 'myLoadBalancerRDP3' -FrontendIpConfiguration $feip `
-      -Protocol tcp -FrontendPort 4223 -BackendPort 3389
+    $natrule2 = New-AzureRmLoadBalancerInboundNatRuleConfig `
+                    -Name "$($natRuleName)2" `
+                    -FrontendPort $($natRulePortStart + 2) `
+                    -BackendPort $natRuleBackEndPort `
+                    -FrontendIpConfiguration $feip `
+                    -Protocol tcp 
+
+    $natrule3 = New-AzureRmLoadBalancerInboundNatRuleConfig `
+                    -Name "$($natRuleName)3" `
+                    -FrontendPort $($natRulePortStart + 3) `
+                    -BackendPort $natRuleBackEndPort `
+                    -FrontendIpConfiguration $feip `
+                    -Protocol tcp 
 
 
 
@@ -83,18 +160,18 @@ If ($isLBExist)
             -FrontendIpConfiguration $feip `
             -BackendAddressPool $bepool `
             -Probe $probe `
-            -LoadBalancingRule $rule `
-            -InboundNatRule $natrule1,$natrule2,$natrule3
+            -LoadBalancingRule $lbrule `
+            -InboundNatRule $natrule1,$natrule2,$natrule3 `
+            -Tag $tags 
 } 
 Else 
 {
     Write-Output "Load Balancer exist"
 
+
     Write-Verbose "Fetching Load Balancer: {$lbName}"
 
-
-    $lb = Get-AzureRmLoadBalancer `
-            -Name $lbName 
+    $lb = Get-AzureRmLoadBalancer -Name $lbName -ResourceGroupName $rgName 
 }
 
 
@@ -103,16 +180,18 @@ Write-Verbose "Get list of Load Balancers"
 Write-Output "Load Balancers"
 
 
-Get-AzureRmResourceGroup | Select-Object ResourceGroupName, Location `
-                         | Format-Table -AutoSize -Wrap -GroupBy Location
+Get-AzureRmLoadBalancer `
+    | Select-Object Name, ResourceGroupName, Location `
+    | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
 
 
 <#
+Write-Verbose "Removing Load Balancer"
 
 
 Write-Verbose "Delete Load Balancer: {$lbName}"
 
-$jobLBDelete = Remove-AzureRmResourceGroup -Name $lbName -Force -AsJob
+$jobLBDelete = Remove-AzureRmResourceGroup -Name $lbName -ResourceGroupName $rgName -Force -AsJob
 
 $jobLBDelete
 
@@ -123,8 +202,12 @@ $jobLBDelete
 
 
 <#
+# References
 
 https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-windows-powershell-sample-create-nlb-vm?toc=%2fpowershell%2fmodule%2ftoc.json
+
+# load balancer
+https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-overview
 
 #>
 
