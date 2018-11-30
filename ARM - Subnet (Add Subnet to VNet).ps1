@@ -97,12 +97,10 @@ Write-Verbose "Removing Subnet: {$subnetName}"
 
 Remove-AzureRmVirtualNetworkSubnetConfig -Name $subnetName -VirtualNetwork $vnet
 
-
 # updates the existing virtual network with the new subnet.
 $vnet | Set-AzureRmVirtualNetwork
 
 #>
-
 
 <#
 ## References
@@ -112,4 +110,3 @@ https://docs.microsoft.com/en-us/powershell/module/azurerm.network/get-azurermvi
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/remove-azurermvirtualnetworksubnetconfig?view=azurermps-6.13.0
 
 #>
-
