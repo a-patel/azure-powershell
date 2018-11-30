@@ -118,9 +118,11 @@ If ($isLBExist)
     $lbrule = New-AzureRmLoadBalancerRuleConfig `
                 -Name $lbRuleName `
                 -Probe $probe `
-                -Protocol Tcp `
-                -FrontendPort 80 -BackendPort 80 `
-                -FrontendIpConfiguration $feip -BackendAddressPool $bePool
+                -FrontendIpConfiguration $feip `
+                -BackendAddressPool $bePool `
+                -FrontendPort 80 `
+                -BackendPort 80 `
+                -Protocol Tcp 
 
 
 
@@ -163,6 +165,99 @@ If ($isLBExist)
             -LoadBalancingRule $lbrule `
             -InboundNatRule $natrule1,$natrule2,$natrule3 `
             -Tag $tags 
+
+
+
+
+
+<#
+
+    # Creates a load balancer probe on port 80.
+    Write-Verbose "Creating a load balancer probe on port 80: {$healthProbeName}"
+
+    Add-AzureRmLoadBalancerProbeConfig `
+      -LoadBalancer $lb `
+      -Name $healthProbeName `
+      -Protocol Http `
+      -Port 80 `
+      -RequestPath / `
+      -IntervalInSeconds 360 `
+      -ProbeCount 2
+
+    Set-AzureRmLoadBalancer -LoadBalancer $lb
+
+
+#>
+
+
+<#
+
+    # Creates a load balancer rule (for port 80).
+    Write-Verbose "Creating a load balancer rule (for port 80): {$lbRuleName}"
+
+    $probe = Get-AzureRmLoadBalancerProbeConfig -Name $healthProbeName -LoadBalancer $lb 
+
+    Add-AzureRmLoadBalancerRuleConfig `
+      -LoadBalancer $lb `
+      -Name $lbRuleName `
+      -Probe $probe `
+      -FrontendIpConfiguration $lb.FrontendIpConfigurations[0] `
+      -BackendAddressPool $lb.BackendAddressPools[0] `
+      -FrontendPort 80 `
+      -BackendPort 80 `
+      -Protocol Tcp 
+
+    Set-AzureRmLoadBalancer -LoadBalancer $lb
+
+#>
+
+
+<#
+#$rgName="qweasdzxc-rg"
+#$lbName="qweasdzxc-lb"
+
+$lbRuleName = "TestNatRule"
+$natRuleFrontEndPort = 3350
+$natRuleBackEndPort = 3350
+
+    # Create NAT rule.
+
+    Write-Verbose "Fetching Load Balancer: {$lbName}"
+
+    $lb = Get-AzureRmLoadBalancer -Name $lbName -ResourceGroupName $rgName 
+
+
+    Write-Verbose "Creating NAT rules: {$lbRuleName}"
+
+    Add-AzureRmLoadBalancerInboundNatRuleConfig `
+        -LoadBalancer $lb `
+        -Name $lbRuleName `
+        -FrontendIPConfiguration $lb.FrontendIpConfigurations[0] `
+        -FrontendPort $natRuleFrontEndPort `
+        -BackendPort $natRuleBackEndPort `
+        -Protocol "Tcp" `
+        -EnableFloatingIP
+
+    Set-AzureRmLoadBalancer -LoadBalancer $lb
+
+
+
+    # Remove NAT rule
+
+    Write-Verbose "Fetching Load Balancer: {$lbName}"
+
+    $lb = Get-AzureRmLoadBalancer -Name $lbName -ResourceGroupName $rgName 
+
+
+    Write-Verbose "Removing NAT rule: {$lbRuleName}"
+    
+    Remove-AzureRmLoadBalancerInboundNatRuleConfig `
+        -LoadBalancer $lb `
+        -Name $lbRuleName `
+
+    Set-AzureRmLoadBalancer -LoadBalancer $lb
+
+#>
 } 
 Else 
 {
@@ -205,6 +300,14 @@ $jobLBDelete
 # References
 
 https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-windows-powershell-sample-create-nlb-vm?toc=%2fpowershell%2fmodule%2ftoc.json
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/tutorial-load-balancer
+
+# Add Probe and LB Rule
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/tutorial-load-balancer
+
+# NAT Rule
+https://docs.microsoft.com/en-us/powershell/module/azurerm.network/add-azurermloadbalancerinboundnatruleconfig?view=azurermps-6.13.0
+
 
 # load balancer
 https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-overview
