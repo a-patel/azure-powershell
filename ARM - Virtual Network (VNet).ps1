@@ -118,8 +118,6 @@ Remove-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName -Force
 #>
 
 
-
-
 <#
 ## References
 
@@ -130,4 +128,3 @@ https://github.com/robotechredmond/Azure-PowerShell-Snippets/blob/master/Azure%2
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/add-azurermvirtualnetworksubnetconfig?view=azurermps-6.13.0
 
 #>
-
