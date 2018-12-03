@@ -51,14 +51,13 @@ If ($isAGWExist)
               -HttpListeners $defaultlistener `
               -RequestRoutingRules $frontendRule `
               -Sku $sku
-
 } 
 Else 
 {
     Write-Output "Application Gateway exist"
 
-    Write-Verbose "Fetching Application Gateway: {$agwName}"
 
+    Write-Verbose "Fetching Application Gateway: {$agwName}"
 
     $agw = Get-AzureRmApplicationGateway `
             -Name $agwName 
