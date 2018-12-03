@@ -1,38 +1,3 @@
-﻿
-## To Set Verbose output
-$PSDefaultParameterValues['*:Verbose'] = $true
-
-
-
-# Variables - Common
-
-$location = "eastus2"
-
-
-$tags = New-Object 'System.Collections.Generic.Dictionary[String,object]'
-$tags.Add("environment", "Production")         # Production, Staging, QA
-$tags.Add("projectName", "Demo Project")
-$tags.Add("projectVersion", "1.0.0")
-$tags.Add("managedBy", "developer.aashishpatel@gmail.com")
-$tags.Add("billTo", "Ashish Patel")
-$tags.Add("tier", "Front End")                 # Front End, Back End, Data
-$tags.Add("dataProfile", "Public")             # Public, Confidential, Restricted, Internal
-
-
-$vmShortName = "Test"
-$vmSuffix = "VM"
-$vmName = "${vmShortName}${vmSuffix}"
-
-
-$rgShortName = "qweasdzxc"
-$rgSuffix = "-rg"
-$rgName = "${rgShortName}${rgSuffix}"
-
-$diskShortName = "TEST1"
-$diskSuffix = "-DataDisk"
-$diskName = "${diskShortName}${diskSuffix}"
-
-
 
 <# Data Disk (Managed) #>
 
@@ -112,54 +77,6 @@ Get-AzureRmDisk `
     | Select-Object Name, ResourceGroupName, Location `
     | Format-Table -AutoSize -Wrap -GroupBy ResourceGroupName
 #>
-
-
-
-
-
-<#
-
-# Prepare data disks in VM
-# Create an RDP connection with the virtual machine. Open up PowerShell and run this script.
-
-
-Get-Disk | Where partitionstyle -eq 'raw' | `
-Initialize-Disk -PartitionStyle MBR -PassThru | `
-New-Partition -AssignDriveLetter -UseMaximumSize | `
-Format-Volume -FileSystem NTFS -NewFileSystemLabel $diskName -Confirm:$false
-
-#>
-
-
-
-<#
-
-$vmShortName = "Test"
-$vmSuffix = "VM"
-$vmName = "${vmShortName}${vmSuffix}"
-
-
-$rgShortName = "qweasdzxc"
-$rgSuffix = "-rg"
-$rgName = "${rgShortName}${rgSuffix}"
-
-$diskShortName = "TEST1"
-$diskSuffix = "-DataDisk"
-$diskName = "${diskShortName}${diskSuffix}"
-
-
-
-Write-Verbose "Detach Data Disk from Virtul Machine: {$diskName}"
-
-Write-Verbose "Fetching Virtul Machine: {$vmName}"
-$vm = Get-AzureRmVM -Name $vmName -ResourceGroupName $rgName
-
-Remove-AzureRmVMDataDisk -VM $vm -Name $diskName
-
-Update-AzureRmVM -VM $vm -ResourceGroupName $rgName
-
-#>
-
 
 
 
