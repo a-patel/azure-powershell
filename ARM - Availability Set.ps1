@@ -14,7 +14,6 @@ $avSetSuffix = "-as"
 $asName = "${asShortName}${avSetSuffix}"
 
 
-
 <# Create an Azure Availability Set for VM high availability, if it does not exist #>
 
 Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName -ErrorVariable isASExist -ErrorAction SilentlyContinue `
@@ -84,8 +83,6 @@ Write-Verbose "Deleting Availability Set: {$asName}"
 Remove-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName -Force
 
 #>
-
-
 
 
 
