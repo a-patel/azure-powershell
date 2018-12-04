@@ -61,11 +61,15 @@ $lbShortName = "qweasdzxc"
 $lbSuffix = "-lb"
 $lbName = "${lbShortName}${lbSuffix}"
 
-$feName = "qweasdzxcFrontEndPool"
-$bepoolName = "qweasdzxcBackEndPool"
+$lbSku = "Standard"
+
+$frontendName = "qweasdzxcFrontEndPool"
+$lbRuleName = "qweasdzxcLoadBalancerRuleWeb"
+$backendPoolName = "qweasdzxcBackEndPool"
 $healthProbeName = "qweasdzxcHealthProbe"
 $healthProbeNameRequestPath = "/"
-$lbRuleName = "qweasdzxcLoadBalancerRuleWeb"
+
+
 $natRuleName = "RDP"
 $natRuleFrontEndPortStart = 4220
 $natRuleBackEndPort = 3389
@@ -92,13 +96,29 @@ If ($isLBExist)
 
 
     # Create a front-end IP configuration for the website.
-    Write-Verbose "Creating front-end IP configuration: {$feName}"
-    $feIp = New-AzureRmLoadBalancerFrontendIpConfig -Name $feName -PublicIpAddress $publicIp
-
+    Write-Verbose "Creating front-end IP configuration: {$frontendName}"
+    $frontendIP = New-AzureRmLoadBalancerFrontendIpConfig -Name $frontendName -PublicIpAddress $publicIp
+    #$frontendIP = New-AzureRmLoadBalancerFrontendIpConfig -Name $frontendName -PrivateIpAddress $privateIp -SubnetId $vnet.subnets[0].Id
 
     # Create the back-end address pool.
-    Write-Verbose "Creating back-end address pool: {$bepoolName}"
-    $bepool = New-AzureRmLoadBalancerBackendAddressPoolConfig -Name $bepoolName
+    Write-Verbose "Creating back-end address pool: {$backendPoolName}"
+    $backendPool = New-AzureRmLoadBalancerBackendAddressPoolConfig -Name $backendPoolName
+
+
+<#
+
+    # Create a load balancer. (with frontendIP, backendPool) (without probe, lbrule, natrule)
+    Write-Verbose "Creating Load Balancer: {$lbName}"
+
+    $lb = New-AzureRmLoadBalancer `
+            -Name $lbName `
+            -ResourceGroupName $rgName `
+            -Location $location `
+            -FrontendIpConfiguration $frontendIP `
+            -BackendAddressPool $backendPool `
+            -Sku $lbSku `
+            -Tag $tags 
+#>
 
 
     # Creates a load balancer probe on port 80.
@@ -118,8 +138,8 @@ If ($isLBExist)
     $lbrule = New-AzureRmLoadBalancerRuleConfig `
                 -Name $lbRuleName `
                 -Probe $probe `
-                -FrontendIpConfiguration $feip `
-                -BackendAddressPool $bePool `
+                -FrontendIpConfiguration $frontendIP `
+                -BackendAddressPool $backendPool `
                 -FrontendPort 80 `
                 -BackendPort 80 `
                 -Protocol Tcp 
@@ -133,21 +153,21 @@ If ($isLBExist)
                     -Name "$($natRuleName)1" `
                     -FrontendPort $($natRulePortStart + 1) `
                     -BackendPort $natRuleBackEndPort `
-                    -FrontendIpConfiguration $feip `
+                    -FrontendIpConfiguration $frontendIP `
                     -Protocol tcp 
 
     $natrule2 = New-AzureRmLoadBalancerInboundNatRuleConfig `
                     -Name "$($natRuleName)2" `
                     -FrontendPort $($natRulePortStart + 2) `
                     -BackendPort $natRuleBackEndPort `
-                    -FrontendIpConfiguration $feip `
+                    -FrontendIpConfiguration $frontendIP `
                     -Protocol tcp 
 
     $natrule3 = New-AzureRmLoadBalancerInboundNatRuleConfig `
                     -Name "$($natRuleName)3" `
                     -FrontendPort $($natRulePortStart + 3) `
                     -BackendPort $natRuleBackEndPort `
-                    -FrontendIpConfiguration $feip `
+                    -FrontendIpConfiguration $frontendIP `
                     -Protocol tcp 
 
 
@@ -159,16 +179,20 @@ If ($isLBExist)
             -Name $lbName `
             -ResourceGroupName $rgName `
             -Location $location `
-            -FrontendIpConfiguration $feip `
-            -BackendAddressPool $bepool `
+            -FrontendIpConfiguration $frontendIP `
+            -BackendAddressPool $backendPool `
             -Probe $probe `
             -LoadBalancingRule $lbrule `
             -InboundNatRule $natrule1,$natrule2,$natrule3 `
+            -Sku $lbSku `
             -Tag $tags 
 
 
+<#
 
+$backend = Get-AzureRmLoadBalancerBackendAddressPoolConfig -Name $backendPoolName -LoadBalancer $lb
 
+#>
 
 <#
 
@@ -299,6 +323,8 @@ $jobLBDelete
 <#
 # References
 
+https://docs.microsoft.com/en-us/azure/load-balancer/quickstart-create-standard-load-balancer-powershell
+https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-get-started-ilb-arm-ps#step-3-assign-the-nic-to-a-vm
 https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-windows-powershell-sample-create-nlb-vm?toc=%2fpowershell%2fmodule%2ftoc.json
 https://docs.microsoft.com/en-us/azure/virtual-machines/windows/tutorial-load-balancer
 
@@ -311,6 +337,9 @@ https://docs.microsoft.com/en-us/powershell/module/azurerm.network/add-azurermlo
 
 # load balancer
 https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-overview
+
+# internal
+https://docs.microsoft.com/en-us/azure/load-balancer/load-balancer-get-started-ilb-arm-ps#step-3-assign-the-nic-to-a-vm
 
 #>
 
