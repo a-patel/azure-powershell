@@ -40,7 +40,7 @@ $diskShortName = "TEST1"
 $diskSuffix = "-DataDisk"
 $diskName = "${diskShortName}${diskSuffix}"
 
-$diskSizeGB = 128
+$diskSizeGB = 100
 
 
 
@@ -127,4 +127,7 @@ $jobDiskDelete
 https://docs.microsoft.com/en-us/azure/virtual-machines/windows/tutorial-manage-data-disk
 
 #>
+
+
+
 
