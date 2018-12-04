@@ -1,4 +1,4 @@
-﻿Get-AzureRmResourceGroup | Select-Object ResourceGroupName,Location
+Get-AzureRmResourceGroup | Select-Object ResourceGroupName,Location
 
 
 Get-AzureRmVirtualNetwork | Select-Object Name,ResourceGroupName,Location
@@ -6,7 +6,29 @@ Get-AzureRmVirtualNetwork | Select-Object Name,ResourceGroupName,Location
 
 Get-AzureRmNetworkSecurityGroup | Select-Object Name,ResourceGroupName,Location
 
+
+# connect to azure
+Add-AzureRmAccount
+
+# other cmd
+Login-AzureRmAccount
 Get-AzureRmLocation
+Connect-AzureRmAccount
+
+
+$hasPublicIp = $true
+
+if($hasPublicIp)
+{
+"y"
+}
+else
+{
+"N"
+}
+
+
+
 
 $natRuleName = "dsd"
 
