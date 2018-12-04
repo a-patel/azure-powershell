@@ -51,7 +51,6 @@ $vnetName = "${vnetShortName}${vnetSuffix}"
 $webSubnetName = "WebSubnet"
 $frontendSubnetName = "FrontEndSubnet"
 $backendSubnetName = "BackEndSubnet"
-$gatewaySubnetName = "GatewaySubnet"
 
 # Variables - Public IP
 
@@ -91,12 +90,20 @@ $nicName = "${nicShortName}${nicSuffix}"
 $subnetName = "WebSubnet"
 
 
-
+$asShortName = "qweasdzxc"
+$avSetSuffix = "-as"
+$asName = "${asShortName}${avSetSuffix}"
 
 
 
 <# Virtul Machine #>
 
+<#
+
+Network Interface (NIC)
+Availability Set (AS)
+
+#>
 
 # Variables - Virtul Machine
 
@@ -110,6 +117,11 @@ $password = "Password@1234"
 
 $vmSize = "Standard_D1"
 $vmSKU = "2016-Datacenter"
+
+$osDiskShortName = "${vmName}"
+$osDiskSuffix = "-osdisk"
+$osDiskName = "${osDiskShortName}${osDiskSuffix}"
+$osDiskSize = 128
 
 # linux virtual machine
 # $vmSKU = "14.04.2-LTS"
@@ -135,19 +147,15 @@ If ($isVMExist)
 
     # Network Interface (NIC)
     Write-Verbose "Creating Network Interface (NIC): {$nicName}"
-
-    $nic = Get-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName
-
+    $nic = Get-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName 
 
 
     # Availability Set (AS)
     Write-Verbose "Fetching Availability Set: {$asName}"
+    $as = Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName 
+    
 
-    $as = Get-AzureRmAvailabilitySet -Name $asName -ResourceGroupName $rgName
-
-
-
-    # Create user object (credential)
+    # User credential
     $passwordSecure = ConvertTo-SecureString -String $password -AsPlainText -Force
     $cred = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $username, $passwordSecure
 
@@ -162,6 +170,79 @@ If ($isVMExist)
     # Create a virtual machine configuration
 
     Write-Verbose "Creating a Virtul Machine: {$vmName}"
+
+
+    $vmConfig = New-AzureRmVMConfig `
+      -VMName $vmName `
+      -VMSize $vmSize `
+      -AvailabilitySetId $as.Id
+    
+    $vmConfig = Set-AzureRmVMOSDisk `
+        -VM $vmConfig `
+        -Name $osDiskName `
+        -CreateOption FromImage `
+        -Windows `
+        -DiskSizeInGB $osDiskSize `
+        -StorageAccountType StandardLRS `
+
+    $vmConfig = Set-AzureRmVMOperatingSystem `
+      -VM $vmConfig `
+      -Windows `
+      -ComputerName $vmName `
+      -Credential $cred
+    
+    $vmConfig = Set-AzureRmVMSourceImage `
+      -VM $vmConfig `
+      -PublisherName MicrosoftWindowsServer `
+      -Offer WindowsServer `
+      -Skus $vmSKU `
+      -Version latest
+    
+    $vmConfig = Add-AzureRmVMNetworkInterface `
+      -VM $vmConfig `
+      -Id $nic.Id
+    
+    $vmConfig = Set-AzureRmVMBootDiagnostics `
+      -VM $vmConfig `
+      -Disable
+
+        
+
+    $vm = New-AzureRmVM `
+        -VM $vmConfig `
+        -ResourceGroupName $rgName `
+        -Location $location 
+
+
+
+<#      
+   # OS Disk: Other options (Not working)
+    
+    # OS Disk (Managed Disk)
+    #Write-Verbose "Fetching OS Disk: {$osDiskName}"
+    #$osDisk = Get-AzureRmDisk -DiskName $osDiskName -ResourceGroupName $rgName 
+
+
+    $vmConfig = Set-AzureRmVMOSDisk `
+        -VM $vmConfig `
+        -Name $osDiskName `
+        -CreateOption Empty `
+        -Windows `
+        -ManagedDiskId $osDisk.Id `
+       Standard SSD 
+           
+    $vmConfig = Set-AzureRmVMOSDisk `
+        -VM $vmConfig `
+        -Name $osDiskName `
+        -Caching ReadWrite `
+        -CreateOption Empty `
+        -DiskSizeInGB 100 `
+        -Windows
+#>
+
+
+<#
+    # way 2 - shortcut way and use default configuration
 
     $vmConfig = New-AzureRmVMConfig `
                     -VMName $vmName `
@@ -187,9 +268,10 @@ If ($isVMExist)
             -ResourceGroupName $rgName `
             -Location $location 
 
+#>
 
 <#
-    # way 2 - shortcut way and use default configuration
+    # way 3 - shortcut way and use default configuration
 
     $vmParams = @{
           Name = $vmName
@@ -289,6 +371,18 @@ https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines
 
 Linux
 https://docs.microsoft.com/en-us/azure/virtual-machines/scripts/virtual-machines-linux-powershell-sample-create-vm?toc=%2fpowershell%2fmodule%2ftoc.json
+
+Other options
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/change-availability-set
+
+OS Disk
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/change-availability-set
+https://docs.microsoft.com/en-us/powershell/module/azurerm.compute/set-azurermvmosdisk?view=azurermps-6.13.0
+http://www.networknet.nl/apps/wp/archives/2877
+https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.management.compute.models.storageaccounttypes?view=azure-dotnet
+
+Change Disk
+https://docs.microsoft.com/en-us/azure/virtual-machines/windows/change-availability-set
 
 #>
 
