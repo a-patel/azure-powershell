@@ -17,7 +17,6 @@ $vnetName = "${vnetShortName}${vnetSuffix}"
 $webSubnetName = "WebSubnet"
 $frontendSubnetName = "FrontEndSubnet"
 $backendSubnetName = "BackEndSubnet"
-$gatewaySubnetName = "GatewaySubnet"
 
 
 
@@ -53,13 +52,6 @@ If ($isVNetExist)
         -AddressPrefix "10.0.2.0/24"
 
 
-    Write-Verbose "Creating new subnet: {$gatewaySubnetName}"
-
-    $gatewaySubnet = New-AzureRmVirtualNetworkSubnetConfig `
-        -Name $gatewaySubnetName `
-        -AddressPrefix "10.0.3.0/24"
-
-
 
     Write-Verbose "Creating new Virtual Network: {$vnetName}"
 
@@ -68,7 +60,7 @@ If ($isVNetExist)
               -ResourceGroupName $rgName `
               -Location $location `
               -AddressPrefix 10.0.0.0/16 `
-              -Subnet $webSubnet, $frontendSubnet, $backendSubnet, $gatewaySubnet `
+              -Subnet $webSubnet, $frontendSubnet, $backendSubnet `
               -Tag $tags
 }
 Else 
@@ -118,6 +110,8 @@ Remove-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName -Force
 #>
 
 
+
+
 <#
 ## References
 
@@ -128,3 +122,4 @@ https://github.com/robotechredmond/Azure-PowerShell-Snippets/blob/master/Azure%2
 https://docs.microsoft.com/en-us/powershell/module/azurerm.network/add-azurermvirtualnetworksubnetconfig?view=azurermps-6.13.0
 
 #>
+
