@@ -1,11 +1,3 @@
-
-
-
-## To Set Verbose output
-$PSDefaultParameterValues['*:Verbose'] = $true
-
-
-
 # Variables - Resource Group
 
 $rgShortName = "qweasdzxc"
@@ -13,75 +5,65 @@ $rgSuffix = "-rg"
 $rgName = "${rgShortName}${rgSuffix}"
 
 
+# Variables - Network Security Group (NSG)
 
-
-# Variables - Network Interface (NIC)
-
-$nicShortName = "qweasdzxc"
-$nicSuffix = "-nic"
-$nicName = "${nicShortName}${nicSuffix}"
-
-
-# Variables - Public IP
-
-$publicIpShortName = "qweasdzxc3"
-$publicIpSuffix = "-ip"
-$publicIpName = "${publicIpShortName}${publicIpSuffix}"
+$nsgShortName = "qweasdzxc"
+$nsgSuffix = "-nsg"
+$nsgName = "${nsgShortName}${nsgSuffix}"
 
 
 
-# NOTE: NOT WORKING
-
-<# Network Interface (NIC) - Remove Public IP #>
-# NOTE: It only assign Public IP Address to NIC's IP Config
+<# Network Security Group (NSG) - Add Security Rule #>
 
 <#
 
-Network Interface (NIC)
-Public IP address
+Network Security Group (NSG)
 
 #>
 
+# Variables - Security Rule (NSG) 
+
+$ruleName = "HTTP"
+$ruleDescription = "Allow Inbound HTTP"
+$rulePort = 80
+$rulePriority = 100
 
 
-Get-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName -ErrorVariable isNICExist -ErrorAction SilentlyContinue `
+Get-AzureRmNetworkSecurityGroup -Name $nsgName -ResourceGroupName $rgName -ErrorVariable isNSGExist -ErrorAction SilentlyContinue `
 
 
-If (!$isNICExist) 
+If (!$isNSGExist) 
 {
-    Write-Output "Network Interface (NIC) exist"
-
-
-    Write-Verbose "Fetching Network Interface (NIC): {$nicName}"
-    $nic = Get-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName
-
+    Write-Output "Network Security Group exist"
     
-    Write-Verbose "Fetching Public IP: {$publicIpName}"
-    $publicIp = Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName
+
+    Write-Verbose "Fetching Network Security Group: {$nsgName}"
+    $nsg = Get-AzureRmNetworkSecurityGroup -Name $nsgName -ResourceGroupName $rgName
 
 
 
-    Write-Verbose "Adding Public IP: {$publicIpName}  to Network Interface (NIC): {$nicName}"
+    Write-Verbose "Creating network security rule: {$ruleName} (Port: {$rulePort})"
 
 
-    $nic.IpConfigurations[0].PublicIpAddress = $publicIp 
-    Set-AzureRmNetworkInterface -NetworkInterface $nic
-
-
-<#
-$asg = New-AzureRmApplicationSecurityGroup `
-    -Name MyASG `
-    -ResourceGroupName $rgName `
-    -Location $location `
-
-$nic | Set-AzureRmNetworkInterfaceIpConfig -Name $nic.IpConfigurations[0].Name -Subnet $vnet.Subnets[0] -ApplicationSecurityGroup $asg | Set-AzureRmNetworkInterface
-
-$nic | Add-AzureRmNetworkInterfaceIpConfig -Name MyNewIpConfig -Subnet $vnet.Subnets[0] -ApplicationSecurityGroup $asg  | Set-AzureRmNetworkInterface
-#>
+    $nsg | `
+    
+    Add-AzureRmNetworkSecurityRuleConfig `
+        -Name $ruleName `
+        -Description $ruleDescription `
+        -DestinationPortRange $rulePort `
+        -Priority $rulePriority `
+        -Access Allow `
+        -Direction Inbound `
+        -Protocol Tcp `
+        -SourceAddressPrefix * `
+        -DestinationAddressPrefix * `
+        -SourcePortRange * | ` 
+    
+    Set-AzureRmNetworkSecurityGroup
 } 
 Else 
 {
-    Write-Output "Network Interface (NIC) does not exist"
+    Write-Output "Network Security Group does not exist"
 }
 
 
@@ -91,8 +73,8 @@ Else
 <#
 ## References
 
-https://stackoverflow.com/questions/34164282/assigning-a-public-ip-address-to-an-existing-nic-in-azure-using-powershell
-https://docs.microsoft.com/en-us/powershell/module/azurerm.network/add-azurermnetworkinterfaceipconfig?view=azurermps-6.13.0
+https://docs.microsoft.com/en-us/powershell/module/azurerm.network/add-azurermnetworksecurityruleconfig?view=azurermps-6.13.0
+https://docs.microsoft.com/en-us/azure/virtual-network/manage-network-security-group
+https://docs.microsoft.com/en-us/powershell/module/azurerm.network/new-azurermnetworksecurityruleconfig?view=azurermps-6.13.0
 
 #>
-
