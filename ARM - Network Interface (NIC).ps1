@@ -55,7 +55,7 @@ $gatewaySubnetName = "GatewaySubnet"
 
 # Variables - Public IP
 
-$publicIpShortName = "qweasdzxc"
+$publicIpShortName = "qweasdzxc3"
 $publicIpSuffix = "-ip"
 $publicIpName = "${publicIpShortName}${publicIpSuffix}"
 $dnsPrefix  = "qweasdzxc"
@@ -69,6 +69,8 @@ $nsgName = "${nsgShortName}${nsgSuffix}"
 
 
 
+$subnetName = "BackEndSubnet"
+
 
 <# Network Interface (NIC) #>
 
@@ -76,19 +78,26 @@ $nsgName = "${nsgShortName}${nsgSuffix}"
 
 Virtual Network (VNet)
 Subnet
-Public IP address
-Network Security Group (NSG) 
+Network Security Group (NSG) (optional)
+Public IP address (optional)
 
 #>
 
 
 # Variables - Network Interface (NIC)
 
-$nicShortName = "qweasdzxc"
+$nicShortName = "qweasdzxc2"
 $nicSuffix = "-nic"
 $nicName = "${nicShortName}${nicSuffix}"
 
-$subnetName = "WebSubnet"
+# NIC has public IP or not
+$hasPublicIp = $true
+
+# Static: Private Ip Address (within the subnet ip range)
+#$privateIpAddress = "10.0.2.77"
+
+# Dynamic: Private Ip Address
+$privateIpAddress = $null 
 
 
 <# Create Network Interface (NIC), if it does not exist #>
@@ -96,49 +105,103 @@ $subnetName = "WebSubnet"
 Get-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName -ErrorVariable isNICExist -ErrorAction SilentlyContinue `
 
 
-If ($isNICExist) 
+if ($isNICExist) 
 {
     Write-Output "Network Interface (NIC) does not exist"
 
     
     # Virtual Network (VNet)
     Write-Verbose "Fetching Virtual Network (VNet): {$vnetName}"
-    
     $vnet = Get-AzureRmVirtualNetwork -Name $vnetName -ResourceGroupName $rgName
 
 
     # Subnet
     Write-Verbose "Fetching Subnet: {$subnetName}"
-
     $subnet = Get-AzureRmVirtualNetworkSubnetConfig -Name $subnetName -VirtualNetwork $vnet
-
-
-    # Public IP address 
-    Write-Verbose "Fetching Public IP: {$publicIpName}"
-
-    $publicIp = Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName
 
 
     # Network Security Group (NSG) 
     Write-Verbose "Fetching Network Security Group (NSG): {$nsgName}"
-
     $nsg = Get-AzureRmNetworkSecurityGroup -Name $nsgName -ResourceGroupName $rgName
 
+    
+
+    $IPconfigName = "ipconfig1"
+
+    if($hasPublicIp)
+    {
+        # Public IP address 
+        Write-Verbose "Fetching Public IP: {$publicIpName}"
+        $publicIp = Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName
 
 
-    # Create a virtual network card and associate with public IP address and NSG
-    Write-Verbose "Creating Network Interface (NIC): {$nicName}"
+        # Create a IP config and associate with public IP address
+        Write-Verbose "Creating IP config (with public IP address): {$IPconfigName}, Subnet: {$subnetName}, Public Ip: {$publicIpName}"
+    }
+    else
+    {
+        $publicIp = $null
+
+        # Create a IP config without public IP address
+        Write-Verbose "Creating IP config (without public IP address): {$IPconfigName}, Subnet: {$subnetName}"
+    }
+    
+
+    # IP config 
+    $IPconfig = New-AzureRmNetworkInterfaceIpConfig `
+        -Name $IPconfigName `
+        -Subnet $subnet `
+        -PrivateIpAddress $privateIpAddress `
+        -PrivateIpAddressVersion IPv4 `
+        -PublicIpAddress $publicIp `
+
+
+
+    # Create a virtual network card 
+    Write-Verbose "Creating Network Interface (NIC): {$nicName}, Subnet: {$subnetName}, NSG: {$nsgName}"
 
     $nic = New-AzureRmNetworkInterface `
-                -Name $nicName `
-                -ResourceGroupName $rgName `
-                -Location $location `
-                -Subnet $subnet `
-                -PublicIpAddress $publicIp `
-                -NetworkSecurityGroup $nsg `
-                -Tag $tags 
+        -Name $nicName `
+        -ResourceGroupName $rgName `
+        -Location $location `
+        -NetworkSecurityGroup $nsg `
+        -IpConfiguration $IPconfig `
+        -Tag $tags 
+
+
+
+<#
+    # Default options without IP Config
+
+    if($hasPublicIp)
+    {
+        # Public IP address 
+        Write-Verbose "Fetching Public IP: {$publicIpName}"
+        $publicIp = Get-AzureRmPublicIpAddress -Name $publicIpName -ResourceGroupName $rgName
+
+
+        # Create a virtual network card and associate with public IP address and NSG
+        Write-Verbose "Creating Network Interface (NIC): {$nicName}, Subnet: {$subnetName}, NSG: {$nsgName}, Public Ip: {$publicIpName}"
+    }
+    else
+    {
+        $publicIp = $null
+
+        # Create a virtual network card without public IP address and NSG
+        Write-Verbose "Creating Network Interface (NIC): {$nicName}, Subnet: {$subnetName}, NSG: {$nsgName}"
+    }
+
+    $nic = New-AzureRmNetworkInterface `
+            -Name $nicName `
+            -ResourceGroupName $rgName `
+            -Location $location `
+            -Subnet $subnet `
+            -NetworkSecurityGroup $nsg `
+            -PublicIpAddress $publicIp `
+            -Tag $tags 
+#>
 } 
-Else 
+else 
 {
     Write-Output "Network Interface (NIC) exist"
 
@@ -175,7 +238,7 @@ Get-AzureRmNetworkInterface `
 
 ## Remove Network Interface (NIC)
 
-$nicShortName = "qweasdzxc"
+$nicShortName = "qweasdzxc2"
 $nicSuffix = "-nic"
 $nicName = "${nicShortName}${nicSuffix}"
 
@@ -191,7 +254,7 @@ Remove-AzureRmNetworkInterface -Name $nicName -ResourceGroupName $rgName -Force
 <#
 ## References
 
-
+https://docs.microsoft.com/en-us/powershell/module/azurerm.network/new-azurermnetworkinterface?view=azurermps-6.13.0
 
 #>
 
