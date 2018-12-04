@@ -1,4 +1,4 @@
-﻿
+
 
 ## To Set Verbose output
 $PSDefaultParameterValues['*:Verbose'] = $true
@@ -47,12 +47,16 @@ $lb = Get-AzureRMLoadBalancer -Name $lbName -ResourceGroupName $rgName
 
 Write-Verbose "Attaching/Adding VM's Network Interface (NIC) {$nicName} to the load balancer: {$lbName}"
 
-$nic.IpConfigurations[0].LoadBalancerBackendAddressPools = $lb.BackendAddressPools[0]
+#$nic.IpConfigurations[0].LoadBalancerBackendAddressPools = $lb.BackendAddressPools[0]
+
+#Set-AzureRmNetworkInterface -NetworkInterface $nic
+
+
+
+
+$nic.LoadBalancerInboundNatRule = $lb.InboundNatRules[0]
 
 Set-AzureRmNetworkInterface -NetworkInterface $nic
-
-
-
 
 
 <#
