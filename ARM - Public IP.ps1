@@ -56,7 +56,7 @@ Write-Output "Public IP"
 
 
 Get-AzureRmPublicIpAddress -ResourceGroupName $rgName `
-    | Select-Object Name, ResourceGroupName, Location `
+    | Select-Object Name, IpAddress, @{label='FQDN';expression={$_.DnsSettings.Fqdn}}, ResourceGroupName, Location `
     | Format-Table -AutoSize -Wrap
 
 
