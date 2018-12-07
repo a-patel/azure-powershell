@@ -1,2 +1,2 @@
-# Azure-PowerShell-Snippets
+# Azure PowerShell Snippets
 Useful Azure PowerShell Snippets
