@@ -1,5 +1,5 @@
-# Azure PowerShell Snippets
-Useful Azure PowerShell Snippets
+# Azure PowerShell
+Azure PowerShell scripts for VM, VNet, LB, AG and Storage. Useful powershell snippets for Azure. 
 ---
 
 
